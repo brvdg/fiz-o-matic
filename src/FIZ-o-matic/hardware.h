@@ -21,7 +21,7 @@
 #endif
 
 
-#if defined HW_0_9
+#if defined HW_TRINKET
 // enable SD card
 #define SDCARD
 #define SD_CS 4
