@@ -531,7 +531,7 @@ void menu_clima() {
  * Dynamic Menu for all define values
  */
 void menu_values() {
-  if (( *values[MenuValuesPos].port == 0 ) || ( values[MenuValuesPos].show )) {
+  if (( *values[MenuValuesPos].port == 0 ) || ( !values[MenuValuesPos].show )) {
     if (MenuValuesPos+1 >= (sizeof(values) / sizeof(values[0])) ) {
       MainMenuPos++;
       MenuValuesPos = 0;

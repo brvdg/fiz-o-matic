@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "180825a"
+#define BUILD "180906a"
 
 
 #include <stdarg.h>
@@ -23,7 +23,7 @@
  * the file to UPDATE.bin.
  */
 #if defined SDCARD
-//#include <SDU.h>
+#include <SDU.h>
 #endif
 
 // Include EEPROM-like API for FlashStorage
@@ -75,7 +75,7 @@ void setup() {
   display_init();
   #endif
 
-  notify(BOOTMSG, F("Booting..."));
+  notify(BOOTMSG, F("#Booting..."));
   notify(BOOTMSG, F(BUILD));
   notify(BOOTMSG, F("\n"));
   //delay(5000);
@@ -94,11 +94,11 @@ void setup() {
   /*
    * read config from FlashStorage
    */
-  notify(BOOTMSG, F("READ FLASH"));
+  notify(BOOTMSG, F("#READ FLASH"));
   read_virtual_eeprom();
 
   // plausibility check for variables
-  notify(BOOTMSG, F("check plausibility"));
+  notify(BOOTMSG, F("#check plausibility"));
   check_plausibility();
 
   /*
@@ -114,9 +114,9 @@ void setup() {
     }
   }
   else {
-    notify(BOOTMSG, F("SD is disabled"));
+    notify(BOOTMSG, F("#SD is disabled"));
   }
-  notify(BOOTMSG, F("check plausibility"));
+  notify(BOOTMSG, F("#check plausibility"));
   check_plausibility();
 
 
@@ -248,7 +248,7 @@ void setup() {
   Scheduler.startLoop(loop1);
 
   //notify(BOOTMSG, "---> Ready after " + String(millis(), DEC));
-  message(F("---> Ready after "));
+  message(F("#---> Ready after "));
   message(String(millis()/1000, DEC));
   message(F("s\n"));
 
@@ -296,12 +296,18 @@ void loop() {
   /*
    * TinyGSM Part
    */
-  if ( tinygms_ok ) {
-    tinygsm_loop();
-  }
+  if ( !tinygsm_lock ) {
+    tinygsm_lock = true;
 
-  if ( tinygsm_gps_ok ) {
-    tinygsm_gps_loop();
+    if ( tinygms_ok ) {
+      tinygsm_loop();
+    }
+
+    if ( tinygsm_gps_ok ) {
+      //tinygsm_gps_loop();
+    }
+
+    tinygsm_lock = false;
   }
 
 
@@ -350,8 +356,16 @@ void loop() {
 }
 
 void loop1 () {
+  if ( !tinygsm_lock ) {
+    tinygsm_lock = true;
 
-  delay(100);
+    if ( tinygsm_gps_ok ) {
+      tinygsm_gps_loop();
+    }
+    tinygsm_lock = false;
+    //message(INFO_MSG, F("loop1 finished\n"));
+  }
+  delay(1000);
   yield();
 }
 
@@ -380,7 +394,7 @@ void TC3_Handler()
         // reset the system
         Serial.println(F("#Watchdog reset"));
         flash_watchdog_reset.write(true);
-        //NVIC_SystemReset();
+        NVIC_SystemReset();
     }
 
     // Button ...

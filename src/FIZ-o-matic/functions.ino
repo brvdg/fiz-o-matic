@@ -124,18 +124,18 @@ void parse_config_string(String inputString) {
     found = true;
     message(INFO_MSG, (F("OK\n")));
   }
-  else if ( inputString.startsWith("sim_apn=") ) {
-    sim_apn=getValue( inputString, '=', 1 );
+  else if ( inputString.startsWith("apn=") ) {
+    apn=getValue( inputString, '=', 1 );
     found = true;
     message(INFO_MSG, (F("OK\n")));
   }
-  else if ( inputString.startsWith("sim_user=") ) {
-    sim_user=getValue( inputString, '=', 1 );
+  else if ( inputString.startsWith("apn_user=") ) {
+    apn_user=getValue( inputString, '=', 1 );
     found = true;
     message(INFO_MSG, (F("OK\n")));
   }
-  else if ( inputString.startsWith("sim_pass=") ) {
-    sim_pass=getValue( inputString, '=', 1 );
+  else if ( inputString.startsWith("apn_pass=") ) {
+    apn_pass=getValue( inputString, '=', 1 );
     found = true;
     message(INFO_MSG, (F("OK\n")));
   }
@@ -185,7 +185,7 @@ void parse_config_string(String inputString) {
           message(INFO_MSG, (F("OK\n")));
         }
         else {
-          Serial.println(F("ERROR: use only 'true' or 'false'"));
+          message(F("ERROR: use only 'true' or 'false'"));
         }
         found = true;
       }
@@ -269,6 +269,7 @@ void read_virtual_eeprom() {
   int addr = 0;
 
   if (EEPROM.isValid()) {
+    message(INFO_MSG, F("#read EEPROM!\n"));
 
     //Serial.print("->");
     message(DEBUG_MSG, F("#config ->"));
@@ -316,18 +317,25 @@ void read_virtual_eeprom() {
     char_config = flash_char_config.read();
 
     sim_pin = String(char_config.sim_pin);
-    sim_apn = String(char_config.sim_apn);
-    sim_user = String(char_config.sim_user);
-    sim_pass = String(char_config.sim_pass);
+    apn = String(char_config.apn);
+    apn_user = String(char_config.apn_user);
+    apn_pass = String(char_config.apn_pass);
     blynk_key = String(char_config.blynk_key);
     sms_keyword = String(char_config.sms_keyword);
 
-    Serial.println(char_config.sim_pin);
-    Serial.println(char_config.sim_apn);
-    Serial.println(char_config.sim_user);
-    Serial.println(char_config.sim_pass);
-    Serial.println(char_config.blynk_key);
-    Serial.println(char_config.sms_keyword);
+    message (DEBUG_MSG, F("\n#sim_pin -> "));
+    message (DEBUG_MSG, char_config.sim_pin);
+    message (DEBUG_MSG, F("\n#apn -> "));
+    message (DEBUG_MSG, char_config.apn);
+    message (DEBUG_MSG, F("\n#apn_user -> "));
+    message (DEBUG_MSG, char_config.apn_user);
+    message (DEBUG_MSG, F("\n#apn_pass -> "));
+    message (DEBUG_MSG, char_config.apn_pass);
+    message (DEBUG_MSG, F("\n#blynk_key -> "));
+    message (DEBUG_MSG, char_config.blynk_key);
+    message (DEBUG_MSG, F("\n#sms_keyword -> "));
+    message (DEBUG_MSG, char_config.sms_keyword);
+    message (DEBUG_MSG, F("\n"));
 
   } else {
     display_bootmsg(F("config flash is empty"));
@@ -348,7 +356,6 @@ void write_virtual_eeprom() {
     EEPROM.write(addr, *config[i].config);
     config_i = i;
     addr++;
-    Serial.println(addr, DEC);
   }
   config_i++;
   for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
@@ -356,7 +363,6 @@ void write_virtual_eeprom() {
 
     port_i = i;
     addr++;
-    Serial.println(addr, DEC);
   }
   port_i++;
   for (int i = 0; i <= (sizeof(features) / sizeof(features[0])) - 1; i++){
@@ -367,14 +373,13 @@ void write_virtual_eeprom() {
       EEPROM.write(addr, 0);
     }
     addr++;
-    Serial.println(addr, DEC);
   }
 
   char_config = flash_char_config.read();
   sim_pin.toCharArray( char_config.sim_pin, 6);
-  sim_apn.toCharArray( char_config.sim_apn, 36);
-  sim_user.toCharArray( char_config.sim_user, 12);
-  sim_pass.toCharArray( char_config.sim_pass, 8);
+  apn.toCharArray( char_config.apn, 36);
+  apn_user.toCharArray( char_config.apn_user, 12);
+  apn_pass.toCharArray( char_config.apn_pass, 8);
   blynk_key.toCharArray( char_config.blynk_key, 36);
   sms_keyword.toCharArray( char_config.sms_keyword, 36);
 
@@ -382,10 +387,12 @@ void write_virtual_eeprom() {
 
   EEPROM.commit();
   message(INFO_MSG, F("#Done!\n"));
-
-  message(INFO_MSG, F("#isValid() returns "));
-  message(INFO_MSG, String(EEPROM.isValid()));
-  message(INFO_MSG, F("\n"));
+  if ( EEPROM.isValid() ) {
+    message(INFO_MSG, F("#EEPROM is valid\n"));
+  }
+  //message(INFO_MSG, F("#isValid() returns "));
+  //message(INFO_MSG, String(EEPROM.isValid()));
+  //message(INFO_MSG, F("\n"));
 
   read_virtual_eeprom();
 
@@ -472,6 +479,7 @@ void button() {
         #ifdef U8G2_DISPLAY
         display_loop();
         #endif
+        online_intervall_timer = online_intervall_timer + 10000;
         //#endif
       }
       else {

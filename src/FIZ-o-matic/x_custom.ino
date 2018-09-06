@@ -20,7 +20,7 @@ unsigned long custom_timer = 0;
 
 
 void custom_init() {
-  notify(BOOTMSG, F("Init custom functions"));
+  notify(BOOTMSG, F("#Init custom functions"));
 }
 
 void custom_loop() {

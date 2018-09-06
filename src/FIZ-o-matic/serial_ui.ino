@@ -14,7 +14,7 @@ void message(String msg) {
 void message(byte loglevel, String msg) {
 
   if ( loglevel == ERROR ) {
-    Serial.print(F("ERROR: "));
+    Serial.print(F("!ERROR: "));
     Serial.println(msg);
   }
   else {
@@ -41,103 +41,105 @@ void serial_parse() {
     else {
       bitSet(debug, tmp.toInt()-1);
     }
-    Serial.print(F("Debug Level is: "));
+    Serial.print(F("#Debug Level is: "));
     Serial.println(debug, DEC);
   }
   else if ( inputString.startsWith(F("print")) ) {
-    Serial.println(F("PRINT found"));
+    Serial.println(F("#PRINT found"));
     serial_print_status();
     //print_port_values();
   }
   else if ( inputString.startsWith(F("i2c scan")) ) {
-    Serial.println(F("i2c scan found"));
+    Serial.println(F("#i2c scan found"));
     i2c_init();
   }
   else if ( inputString.startsWith(F("features")) ) {
-    Serial.println(F("Features:"));
+    Serial.println(F("#Features:"));
     serial_print_features();
   }
   else if ( inputString.startsWith(F("status")) ) {
-    Serial.println(F("Status:"));
+    Serial.println(F("#Status:"));
     serial_print_status();
   }
   else if ( inputString.startsWith(F("tail")) ) {
     if (!tail) {
       tail = true;
-      Serial.println(F("tail is on"));
+      Serial.println(F("#tail is on"));
     }
     else {
       tail = false;
-      Serial.println(F("tail is off"));
+      Serial.println(F("#tail is off"));
     }
   }
   else if ( inputString.startsWith(F("config")) ) {
-    Serial.println(F("Config:"));
+    Serial.println(F("#Config:"));
     serial_print_config();
   }
   else if ( inputString.startsWith(F("ports")) ) {
-    Serial.println(F("Ports:"));
+    Serial.println(F("#Ports:"));
     serial_print_ports();
   }
   else if ( inputString.startsWith(F("save")) ) {
-    Serial.println(F("Save configuratgion:"));
+    Serial.println(F("#Save configuratgion:"));
     check_plausibility();
     save_config();
   }
   else if ( inputString.startsWith(F("check")) ) {
-    Serial.println(F("Check configuratgion:"));
+    Serial.println(F("#Check configuratgion:"));
     check_plausibility();
   }
   else if ( inputString.startsWith(F("help")) ) {
-    Serial.println(F("Help:"));
+    Serial.println(F("#Help:"));
     serial_print_help();
   }
 
 
 
   else if ( inputString.startsWith(F("tinygsm_init")) ) {
-    Serial.println(F("tinygsm_init:"));
+    Serial.println(F("#tinygsm_init:"));
     tinygsm_init();
   }
   else if ( inputString.startsWith(F("tinygsm_info")) ) {
-    Serial.println(F("tinygsm_info:"));
+    Serial.println(F("#tinygsm_info:"));
     tinygsm_info();
   }
   else if ( inputString.startsWith(F("gsm_info")) ) {
-    Serial.println(F("gsm_info:"));
+    Serial.println(F("#gsm_info:"));
     tinygsm_info();
   }
   else if ( inputString.startsWith(F("tinygsm_gps_init")) ) {
-    Serial.println(F("tinygsm_gps_init:"));
+    Serial.println(F("#tinygsm_gps_init:"));
     tinygsm_gps_init();
   }
   else if ( inputString.startsWith(F("sdcard_init")) ) {
-    Serial.println(F("sdcard_init:"));
+    Serial.println(F("#sdcard_init:"));
     sdcard_init();
   }
   else if ( inputString.startsWith(F("mount")) ) {
-    Serial.println(F("sdcard_init:"));
+    Serial.println(F("#sdcard_init:"));
     sdcard_init();
   }
 
   else if ( inputString.startsWith(F("go_online")) ) {
-    Serial.println(F("going online for 120s"));
-    if (tinygsm_go_online()) {
+    Serial.println(F("#going online for 120s"));
+    /*if (tinygsm_go_online()) {
       online = true;
       online_intervall_timer = millis() + 120000;
-      Serial.println(F("we are online"));
-    }
+      Serial.println(F("#we are online"));
+    }*/
+    go_online = true;
   }
   else if ( inputString.startsWith(F("go_offline")) ) {
-    if (tinygsm_go_offline()) {
+    /*if (tinygsm_go_offline()) {
       online = false;
       online_intervall_timer = millis() + online_interval * 60000;
-      Serial.println(F("we are offline"));
-    }
+      Serial.println(F("#we are offline"));
+    }*/
+    go_offline = true;
   }
 
   else if ( inputString.startsWith(F("free")) ) {
-    Serial.print(F("free RAM: "));
+    Serial.print(F(">free RAM: "));
     Serial.print(freeRam(), DEC);
     Serial.println(F(" Bytes"));
     sdcard_free();
@@ -172,18 +174,18 @@ void serial_parse() {
 
   else if ( inputString.startsWith(F("debug")) ) {
 
-    Serial.print(F("Debug Level is: "));
+    Serial.print(F("#Debug Level is: "));
     Serial.println(debug, DEC);
     Serial.println(F("#############"));
-    Serial.println(F("debug=0   ->  all off"));
-    Serial.println(F("     =1   ->  INFO"));
-    Serial.println(F("     =2   ->  DEBUG"));
-    Serial.println(F("     =3   ->  DEBUG_TINYGSM"));
-    Serial.println(F("     =4   ->  DEBUG_SD"));
-    Serial.println(F("     =5   ->  DEBUG_IO"));
-    Serial.println(F("     =6   ->  nothing"));
-    Serial.println(F("     =7   ->  TRACE_TINYGSM"));
-    Serial.println(F("     =8   ->  TRACE"));
+    Serial.println(F("#debug=0   ->  all off"));
+    Serial.println(F("#     =1   ->  INFO"));
+    Serial.println(F("#     =2   ->  DEBUG"));
+    Serial.println(F("#     =3   ->  DEBUG_TINYGSM"));
+    Serial.println(F("#     =4   ->  DEBUG_SD"));
+    Serial.println(F("#     =5   ->  DEBUG_IO"));
+    Serial.println(F("#     =6   ->  nothing"));
+    Serial.println(F("#     =7   ->  TRACE_TINYGSM"));
+    Serial.println(F("#     =8   ->  TRACE"));
 
 
   }
@@ -205,35 +207,35 @@ void serial_print_status() {
 
 
     //Serial.println(F(""));
-    Serial.println(F("!================"));
+    Serial.println(F("#================"));
 
-    Serial.print(F("time:"));
+    Serial.print(F(">time:"));
     sprintf(buf, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
     Serial.println(buf);
 
-    Serial.print(F("date:"));
+    Serial.print(F(">date:"));
     sprintf(buf, "%02d.%02d.20%02d", rtc.getDay(), rtc.getMonth(), rtc.getYear());
     Serial.println(buf);
 
-    Serial.print(F("gsm_signal:"));
+    Serial.print(F(">gsm_signal:"));
     Serial.println(gsm_signal, DEC);
-    Serial.print(F("gps_fixstatus:"));
+    Serial.print(F(">gps_fixstatus:"));
     Serial.println(gps_fixstatus, DEC);
-    Serial.print(F("gps_latitude:"));
+    Serial.print(F(">gps_latitude:"));
     Serial.println(gps_latitude, DEC);
-    Serial.print(F("gps_longitude:"));
+    Serial.print(F(">gps_longitude:"));
     Serial.println(gps_longitude, DEC);
-    Serial.print(F("gps_altitude:"));
+    Serial.print(F(">gps_altitude:"));
     Serial.println(gps_altitude, DEC);
-    Serial.print(F("gps_speed:"));
+    Serial.print(F(">gps_speed:"));
     Serial.println(gps_speed, 2);
-    Serial.print(F("gps_course:"));
+    Serial.print(F(">gps_course:"));
     Serial.println(gps_course, DEC);
-    Serial.print(F("gps_view_satellites:"));
+    Serial.print(F(">gps_view_satellites:"));
     Serial.println(gps_view_satellites, DEC);
-    Serial.print(F("gps_used_satellites:"));
+    Serial.print(F(">gps_used_satellites:"));
     Serial.println(gps_used_satellites, DEC);
-    Serial.print(F("gps_distance:"));
+    Serial.print(F(">gps_distance:"));
     Serial.println(gps_distance, DEC);
 
     /*Serial.print(F("Port 1 (V): "));
@@ -249,21 +251,22 @@ void serial_print_status() {
     Serial.print(F("Port 6 (Hz): "));
     Serial.println(a5_hz, 2);*/
 
-    Serial.print(F("speed:"));
+    Serial.print(F(">speed:"));
     Serial.println(speed, DEC);
 
     for (int i = 0; i <= (sizeof(values) / sizeof(values[0])) - 1; i++) {
+      Serial.print(F(">"));
       Serial.print(values[i].name);
       Serial.print(F(":"));
       Serial.println(*values[i].value);
     }
 
-    Serial.println(F("=== Port Register ==="));
+    Serial.println(F("#=== Port Register ==="));
 
     for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
       if ( port_values[i].port == 0x00 ) break;
 
-      Serial.print(F("0x"));
+      Serial.print(F(">0x"));
       if (port_values[i].port<16) {
         Serial.print(F("0"));
       }
@@ -311,14 +314,14 @@ void serial_print_config(){
   Serial.print(F("sim_pin="));
   Serial.println(sim_pin);
   Serial.println(F("#Provider APN"));
-  Serial.print(F("sim_apn="));
-  Serial.println(sim_apn);
+  Serial.print(F("apn="));
+  Serial.println(apn);
   Serial.println(F("#username for the APN"));
-  Serial.print(F("sim_user="));
-  Serial.println(sim_user);
+  Serial.print(F("apn_user="));
+  Serial.println(apn_user);
   Serial.println(F("#password for the APN"));
-  Serial.print(F("sim_pass="));
-  Serial.println(sim_pass);
+  Serial.print(F("apn_pass="));
+  Serial.println(apn_pass);
   Serial.println(F("#BLYNK authentication key"));
   Serial.print(F("blynk_key="));
   Serial.println(blynk_key);

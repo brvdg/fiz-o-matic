@@ -22,7 +22,7 @@ void sdcard_init() {
     for (int i = 0; i<2; i++) {
 
       SPI_lock = false;
-      notify(BOOTMSG, F("Init SD Card"));
+      notify(BOOTMSG, F("#Init SD Card"));
       SPI_lock = true;
       // initialize the SD card at SPI_HALF_SPEED to avoid bus errors with
       // breadbords.  use SPI_FULL_SPEED for better performance.
@@ -100,7 +100,7 @@ void log_to_sdcard() {
 
 
       if (filename[0] == '-') {
-        Serial.println(F("#no file opened"));
+        message(DEBUG_SD,F("#no file opened"));
       }
       else {
         if ( gps_fixstatus ) {
@@ -490,19 +490,19 @@ void sdcard_save_config() {
       logfile.print(F("sim_pin="));
       logfile.println(sim_pin);
       logfile.println(F("#Provider APN"));
-      logfile.print(F("sim_apn="));
-      logfile.println(sim_apn);
+      logfile.print(F("apn="));
+      logfile.println(apn);
       logfile.println(F("#username for the APN"));
-      logfile.print(F("sim_user="));
-      logfile.println(sim_user);
+      logfile.print(F("apn_user="));
+      logfile.println(apn_user);
       logfile.println(F("#password for the APN"));
-      logfile.print(F("sim_pass="));
-      logfile.println(sim_pass);
+      logfile.print(F("apn_pass="));
+      logfile.println(apn_pass);
       logfile.println(F("#BLYNK authentication key"));
       logfile.print(F("blynk_key="));
       logfile.println(blynk_key);
       logfile.println(F("#SMS Keyword for authentication"));
-      logfile.print(F("="));
+      logfile.print(F("sms_keyword="));
       logfile.println(sms_keyword);
 
 

@@ -34,7 +34,7 @@ byte saved_config = 0;
  * Debugging Variable
  */
 #ifdef DEBUG
-byte debug = 5;
+byte debug = 143;
 #else
 byte debug = 0;
 #endif
@@ -189,9 +189,9 @@ byte enable_blynk = 1;
 boolean sim_ok = true;
 boolean tinygsminit = false;
 String sim_pin = SIM_PIN;
-String sim_apn = SIM_APN;
-String sim_user = SIM_USER;
-String sim_pass = SIM_PASS;
+String apn = APN;
+String apn_user = APN_USER;
+String apn_pass = APN_PASS;
 String blynk_key = BLYNK_KEY;
 String sms_keyword = SMS_Keyword;
 boolean online = false;
@@ -305,6 +305,10 @@ boolean blynk_report = true;
 
 boolean tinygms_ok = false;
 boolean tinygsm_gps_ok = false;
+
+boolean go_online = false;
+boolean go_offline = false;
+boolean tinygsm_lock = false;
 
 int gsm_signal = 0;
 
@@ -519,8 +523,8 @@ struct struct_config {
 const struct_config config[] = {
   //{"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
   {"lastfile_config", "Last Log File (x10)", &lastfile_config, 1, 99, 1},
-  {"dimmer_max", "Dimmer Max.", &dimmer_max, 10, 100, 0},
-  {"dimmer_min", "Dimmer Min.", &dimmer_min, 10, 100, 0},
+  {"dimmer_max", "Dimmer Max.", &dimmer_max, 10, 250, 0},
+  {"dimmer_min", "Dimmer Min.", &dimmer_min, 10, 250, 0},
 //  {"clock_view", "Clock and Temp.", &clock_view, 1, 1, 0},
   {"speed_offset", "Speed Offset", &speed_offset, 1, 25, 0},
   {"water_temp_warning", "Water Temp Warning", &water_temp_warning, 5, 130, 80},
@@ -579,9 +583,9 @@ const struct_features features[] {
  */
 typedef struct {
   char sim_pin[6];
-  char sim_pass[16];
-  char sim_apn[36];
-  char sim_user[12];
+  char apn_pass[16];
+  char apn[36];
+  char apn_user[12];
   char blynk_key[36];
   char sms_keyword[36];
 } struckt_char_config;

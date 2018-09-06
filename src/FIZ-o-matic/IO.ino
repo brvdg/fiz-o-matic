@@ -208,7 +208,8 @@ void dimmer() {
     }
   }
 
-  dimmer_val = ( dimmer_pct * DIMMER_MAX ) / 100;
+  //dimmer_val = ( dimmer_pct * DIMMER_MAX ) / 100;
+  dimmer_val = ((dimmer_max - dimmer_min) * dimmer_pct) / 100;
   if (alarm_counter == 0) {
     analogWrite(U8G2_DISPLAY_BG_LED, dimmer_val);
   }
@@ -479,7 +480,7 @@ void reg_port(byte port_address, byte type) {
 
       //message(INFO_MSG, F("Slot: "));
       //message(INFO_MSG, String(i, DEC));
-      message(INFO_MSG ,F("register device 0x"));
+      message(INFO_MSG ,F("#register device 0x"));
       if (port_address<16) {
         message(INFO_MSG ,"0");
       }

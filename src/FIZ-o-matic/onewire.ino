@@ -17,7 +17,7 @@ unsigned long onewire_timer = 0;
 
 
 void onewire_init() {
-  notify(BOOTMSG, F("Init OneWire"));
+  notify(BOOTMSG, F("#Init OneWire"));
   sensors.begin();
 
   sensors.requestTemperatures(); // Send the command to get temperatures

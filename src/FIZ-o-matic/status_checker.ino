@@ -18,6 +18,9 @@ void status_checker() {
       check_geo_fence();
       check_online();
     }
+    else{
+      message(TRACE_MSG, F("#tinygsminit=false\n"));
+    }
 
     if ( engine_running ) {
       engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
@@ -44,19 +47,16 @@ void check_engine() {
       }
       else {
         #ifdef U8G2_DISPLAY
-
-
         MainMenuPos = 2;
         display_update();
-
-
         #endif //U8G2_DISPLAY
 
         if ( online ) {
           message(DEBUG_MSG, F("#go offline\n"));
-          if ( tinygsm_go_offline() ) {
+          /*if ( tinygsm_go_offline() ) {
             online = false;
-          }
+          }*/
+          go_offline = true;
         }
       }
 
@@ -91,7 +91,8 @@ void check_engine() {
       }
 
       //online_intervall_timer = millis() + 10000;
-      tinygsm_go_online();
+      //tinygsm_go_online();
+      go_online = true;
 
       // disable geo fenece
       if ( geo_fence_distance != 0 ) {
@@ -108,16 +109,16 @@ void check_engine() {
  * Alarm System
  */
 void check_alarm_system() {
-
   if (alarm_system_armed && !alarm_system_triggered) {
     // at started engine
     if (engine_running) {
       message(INFO_MSG ,F("#--->ALARM!!! -Engine-\n"));
       alarm_system_triggered = true;
 
-      if ( tinygsm_go_online() ) {
+      /*if ( tinygsm_go_online() ) {
         online = true;
-      }
+      }*/
+      go_online=true;
 
       set_alarm(600, 200, 5, true);
       tinygsm_alarm();
@@ -179,9 +180,10 @@ void check_geo_fence() {
 void check_online() {
 
   // exit if BLYNK is disabled
-  if ( enable_blynk != 1 ) return;
+  //if ( enable_blynk != 1 ) return;
   if ( !blynk_enabled ) return;
 
+  //message(DEBUG_MSG, F("#check_online\n"));
 
   // online intervall
   if ( !stay_online && !engine_running && !alarm_system_triggered && !geo_fence_alarm) {
@@ -189,8 +191,9 @@ void check_online() {
       message(DEBUG_MSG, F("#check_online state\n"));
       //Serial.println("#");
       if (!online) {
-
-        tinygsm_go_online();
+        //tinygsm_go_online();
+        message(DEBUG_MSG, F("#we should go online\n"));
+        go_online = true;
         /*message(INFO_MSG, F("#going online\n"));
         if (tinygsm_go_online()) {
           online = true;
@@ -198,8 +201,9 @@ void check_online() {
         }*/
       }
       else {
-
-        tinygsm_go_offline();
+        message(DEBUG_MSG, F("#we should go online\n"));
+        //tinygsm_go_offline();
+        go_offline = true;
         /*message(INFO_MSG, F("#going offline\n"));
         if (tinygsm_go_offline()) {
           online = false;
@@ -208,20 +212,26 @@ void check_online() {
       }
     }
   }
+  else {
+    message(TRACE_MSG, F("#stay_online\n"));
+  }
 
   //check the online state
-  if (online) {
+  /*if (online) {
     Blynk.run();
     if (!Blynk.connected()) {
       message(INFO_MSG, F("BLYNK connection was lost\n"));
       blynk_offline_counter++;
       if ( blynk_offline_counter >= 100 ) {
-        tinygsm_go_offline();
-        delay(2000);
-        tinygsm_go_online();
+        message(INFO_MSG, F("try to reset BLYNK connection\n"));
+        //tinygsm_go_offline();
+        go_offline = true;
+        //delay(2000);
+        //tinygsm_go_online();
+        go_online = true;
         blynk_offline_counter = 0;
         blynk_msg(F("BLYNK connection was lost"));
       }
     }
-  }
+  }*/
 }
