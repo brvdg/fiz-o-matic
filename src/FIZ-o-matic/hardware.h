@@ -1,5 +1,5 @@
 /****************************************************
-   Busputer Hardware configuration
+   FIZ-o-Matic Hardware configuration
    for detailed informations see
    https://github.com/brvdg/busputer/wiki
 ****************************************************/
@@ -65,6 +65,9 @@
 // digital Ports
 #define A4_COUNTER
 #define A5_COUNTER
+
+#define GPIO6
+#define GPIO13
 
 #endif //HW_FEATHER
 

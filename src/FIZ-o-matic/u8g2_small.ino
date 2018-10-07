@@ -743,8 +743,8 @@ void menu_opt_config() {
         }
         else {
           if (MenuConfigPos+1 >= (sizeof(config) / sizeof(config[0])) ) {
-            MainMenuPos++;
-            MenuConfigPos = 0;
+            MainMenuPos = MENU_optionen;
+            MenuConfigPos = 1;
           } else {
             MenuConfigPos++;
           }

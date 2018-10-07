@@ -26,6 +26,9 @@ void status_checker() {
       engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
     }
 
+
+    check_auxiliary_heating();
+
     status_checker_timer = millis() + STATUS_CHECKER_TIMER;
   }
 }

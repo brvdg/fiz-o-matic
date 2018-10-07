@@ -84,9 +84,9 @@ float temp_out = 0;
 byte temp_out_port = TEMP_OUT_PORT;
 float hum_out = 0;
 byte hum_out_port = 0;
-float temp_in = -127;
+float temp_in = 0;
 byte temp_in_port = 0;
-float hum_in = -127;
+float hum_in = 0;
 byte hum_in_port = 0;
 
 
@@ -106,6 +106,10 @@ float dimmer_V = 0;
 //byte mood_port = 2;
 byte dimmer_min = 0;
 byte dimmer_max = 10;
+byte dimmer_active = 5;
+unsigned long dimmer_active_timer = 0;
+
+
 
 // Fuel
 float fuel_V = 0;
@@ -148,6 +152,7 @@ byte oil_temp_warning = OIL_TEMP_WARNING;
 
 // Alarm
 byte alarm = 0;
+byte alarm_port = ALARM_PORT;
 unsigned long alarm_timer = 0;
 
 unsigned long alarm_on_timer = 0;
@@ -165,8 +170,11 @@ unsigned long watchdog_timer = 0;
 //const boolean wdreset = false;
 PROGMEM boolean wdreset = false;
 
+// Aauxiliary Heating
+byte aux_heating_port = 0;
 
 // OneWire
+bool onewire_enabled = false;
 bool onewire_available = false;
 
 //I2C
@@ -315,7 +323,7 @@ int gsm_signal = 0;
 boolean use_gps_speed = USE_GPS_SPEED;
 
 boolean gps_fixstatus;
-byte gps_fixerrcnt = 255;
+int gps_fixerrcnt = 0;
 int gps_year;
 int gps_day;
 int gps_month;
@@ -386,6 +394,26 @@ boolean alarm_system_armed = false;
 boolean alarm_system_triggered = false;
 
 
+
+
+/*
+ * Features
+ */
+boolean aux_heater_enabled = true;
+byte aux_heater_status = false;
+unsigned long aux_heater_timer = 0;
+byte aux_heating_mode = 0;
+byte aux_heating_time = 15;
+
+#define STATE_off 0
+#define STATE_on 1
+#define STATE_request_on 2
+#define STATE_wait_blynk_on 3
+#define STATE_request_off 4
+#define STATE_wait_blynk_off 5
+#define STATE_error 6
+
+
 struct struckt_value_maps {
   unsigned int port_value;
   int value;
@@ -423,24 +451,29 @@ struckt_value_maps map_water_temp[32] = {
 
 /*
  * Types:
- * 1  = Volt
- * 2  = Hz
- * 3  = °C
- * 4  = %
- * 5  = km/h
+ * 0 = undefined
+ * 1 = Volt
+ * 2 = Hz
+ * 3 = °C
+ * 4 = %
+ * 5 = km/h
+ * 6 = OneWire
  */
+#define TYPE_undef 0
 #define TYPE_Volt 1
 #define TYPE_Hz 2
 #define TYPE_GradCelsius 3
 #define TYPE_Prozent 4
 #define TYPE_kmh 5
+#define TYPE_System 6
 
 
 struct struct_port_values {
   byte port;
   float value;
   byte type;
-  // size is 48 Bits / 6 Bytes
+  boolean output;
+  // size is 49 Bits / 6 Bytes + 1 bit
 };
 
 struct_port_values port_values[32]; // 32x 6 Bytes = 160 Bytes
@@ -495,20 +528,24 @@ struct struct_ports {
   byte steps;
   byte max;
   byte min;
+  boolean output;
 };
 
 const struct_ports ports[] = {
-  {"bord_voltage_port", "Bord Voltage Port", &bord_voltage_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"dimmer_port", "Dimmer Port", &dimmer_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"fuel_port", "Fuel Gauge Port", &fuel_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"water_temp_port", "Water Gauge Port", &water_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"rpm_port", "RPM Port", &rpm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"speedpulse_port", "GALA Port", &speedpulse_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"speed_source", "Speed Source", &speed_source, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"temp_out_port", "Temp. out", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG}
+  {"bord_voltage_port", "Bord Voltage Port", &bord_voltage_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"dimmer_port", "Dimmer Port", &dimmer_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"fuel_port", "Fuel Gauge Port", &fuel_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"water_temp_port", "Water Gauge Port", &water_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"rpm_port", "RPM Port", &rpm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"speedpulse_port", "GALA Port", &speedpulse_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"speed_source", "Speed Source", &speed_source, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"temp_out_port", "Temp. outsite", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"alarm_port", "Alarm", &alarm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true},
+  {"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
  };
 
 struct struct_config {
@@ -523,15 +560,18 @@ struct struct_config {
 const struct_config config[] = {
   //{"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
   {"lastfile_config", "Last Log File (x10)", &lastfile_config, 1, 99, 1},
-  {"dimmer_max", "Dimmer Max.", &dimmer_max, 10, 250, 0},
-  {"dimmer_min", "Dimmer Min.", &dimmer_min, 10, 250, 0},
+  {"dimmer_max", "Dimmer Max.", &dimmer_max, 5, 255, 0},
+  {"dimmer_min", "Dimmer Min.", &dimmer_min, 5, 255, 0},
+  {"dimmer_active", "Dimmer Active", &dimmer_active, 10, 250, 0},
 //  {"clock_view", "Clock and Temp.", &clock_view, 1, 1, 0},
   {"speed_offset", "Speed Offset", &speed_offset, 1, 25, 0},
   {"water_temp_warning", "Water Temp Warning", &water_temp_warning, 5, 130, 80},
   {"oil_temp_warning", "Oil Temp Warning", &oil_temp_warning, 5, 150, 80},
   {"oil_press_warning", "Oil Press. Warning (/10)", &oil_press_warning, 1, 10, 1},
   {"online_interval", "Online Intervall (min)", &online_interval, 5, 240, 5},
-  {"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, 1, 10, 1}
+//  {"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, 1, 10, 1},
+//  {"aux_heating_mode", "Aux. Heating Mode", &aux_heating_mode, 1, 2, 0},
+  {"aux_heating_time", "Aux. Heating Time", &aux_heating_time, 5, 200, 0}
 };
 
 struct struct_values {
@@ -574,7 +614,8 @@ const struct_features features[] {
   {"gps_enabled", "GPS enabled", &gps_enabled},
   {"blynk_report", "Push reset/boot", &blynk_report},
   {"display_temp", "Display Temperature", &display_temp},
-  {"use_gps_speed", "use GPS Speed", &use_gps_speed,}
+  {"use_gps_speed", "use GPS Speed", &use_gps_speed,},
+  {"onewire_enabled", "enable 1Wire Bus", &onewire_enabled}
 };
 
 

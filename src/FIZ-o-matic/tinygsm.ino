@@ -52,6 +52,7 @@ WidgetLED online_LED(BLYNK_VIRTUAL_online_LED);
 WidgetLED armed_led(BLYNK_VIRTUAL_armed_led);
 WidgetLED alarm_led(BLYNK_VIRTUAL_alarm_led);
 
+
 boolean blynk = false;
 byte i = 0;
 
@@ -354,6 +355,28 @@ void tinygsm_loop()
         gps_altitude_blynk = gps_altitude;
       }
 
+
+      // seting something in the Blynk App
+      if ( aux_heater_status == STATE_wait_blynk_off) {
+        Blynk.virtualWrite(BLYNK_VIRTUAL_aux_heater, LOW);
+        aux_heater_status = STATE_off;
+      }
+
+      // seting Temperature and Humidity
+      if ( temp_out_port != 0x00) {
+        Blynk.virtualWrite(BLYNK_VIRTUAL_temp_out, temp_out);
+      }
+      if ( hum_in_port != 0x00) {
+        Blynk.virtualWrite(BLYNK_VIRTUAL_hum_out, hum_out);
+      }
+      if ( temp_in_port != 0x00) {
+        Blynk.virtualWrite(BLYNK_VIRTUAL_temp_in, temp_in);
+      }
+      if ( hum_in_port != 0x00) {
+        Blynk.virtualWrite(BLYNK_VIRTUAL_hum_in, hum_in);
+      }
+
+
       Blynk.run();
     }
     tinygsm_blynk_timer = millis() + TinyGSM_BLYNK_TIMER;
@@ -413,13 +436,17 @@ void tinygsm_gps_loop() {
     else {
       message(TRACE_MSG, F("#gps not fix (cnt: "));
       message(TRACE_MSG, String(gps_fixerrcnt, DEC));
+      message(TRACE_MSG, F(", view: "));
+      message(TRACE_MSG, String(gps_view_satellites, DEC));
+      message(TRACE_MSG, F(", used: "));
+      message(TRACE_MSG, String(gps_used_satellites, DEC));
       message(TRACE_MSG, F(" )\n"));
 
       if ( gps_view_satellites == 0 ) {
         gps_fixerrcnt++;
       }
 
-      if (gps_fixerrcnt >= 254) {
+      /*if (gps_fixerrcnt >= 1000) {
         message(DEBUG_TINYGSM, F("#try to reset GPS\n"));
         if ( !modem.disableGPS() ) {
           message(DEBUG_TINYGSM, F("can't disable GPS\n"));
@@ -435,7 +462,7 @@ void tinygsm_gps_loop() {
           message(DEBUG_TINYGSM, F("GPS enabled\n"));
         }
         gps_fixerrcnt = 0;
-      }
+      }*/
     }
   }
 }
@@ -746,4 +773,20 @@ BLYNK_WRITE(BLYNK_VIRTUAL_alarm) {
   //tinygsm_loop_running = false;
 }
 
+BLYNK_WRITE(BLYNK_VIRTUAL_aux_heater) {
+  message(TRACE_MSG ,F("#BLYNK_WRITE(BLYNK_VIRTUAL_aux_heater)\n"));
+  int value = param.asInt(); // Get value as integer
+
+
+  if ( value == 1 ) {
+    if ( aux_heater_status == STATE_off ) {
+      set_auxiliary_heating(true);
+    }
+  }
+  else {
+    if ( aux_heater_status == STATE_on ) {
+      set_auxiliary_heating(false);
+    }
+  }
+}
 //#endif // TinyGSM

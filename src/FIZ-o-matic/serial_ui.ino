@@ -92,7 +92,9 @@ void serial_parse() {
     Serial.println(F("#Help:"));
     serial_print_help();
   }
-
+  else if ( inputString.startsWith(F("set_alarm")) ) {
+    set_alarm(150, 150, 5, true);
+  }
 
 
   else if ( inputString.startsWith(F("tinygsm_init")) ) {
@@ -169,9 +171,6 @@ void serial_parse() {
   else if ( inputString.startsWith(F("readflash")) ) {
     read_virtual_eeprom();
   }
-
-
-
   else if ( inputString.startsWith(F("debug")) ) {
 
     Serial.print(F("#Debug Level is: "));
@@ -190,7 +189,12 @@ void serial_parse() {
 
   }
   else {
-    parse_config_string(inputString);
+    if ( parse_config_string(inputString) ) {
+      Serial.println(F("#OK"));
+    }
+    else {
+      Serial.println(F("#error unknown command"));
+    }
   }
 
   Serial.print(F("#fiz-o-matic > "));
@@ -266,13 +270,19 @@ void serial_print_status() {
     for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
       if ( port_values[i].port == 0x00 ) break;
 
+
       Serial.print(F(">0x"));
       if (port_values[i].port<16) {
         Serial.print(F("0"));
       }
       Serial.print(String(port_values[i].port, HEX));
       Serial.print(F(":"));
-      Serial.println(String(port_values[i].value, 2));
+      if ( port_values[i].type == TYPE_System ) {
+        Serial.println(F("na"));
+      }
+      else {
+        Serial.println(String(port_values[i].value, 2));
+      }
       //Serial.print(F("\n"));
     }
     Serial.println(F("#================"));

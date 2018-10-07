@@ -75,6 +75,11 @@
 #define BLYNK_VIRTUAL_alarm V14
 #define BLYNK_VIRTUAL_armed_led V15
 #define BLYNK_VIRTUAL_alarm_led V16
+#define BLYNK_VIRTUAL_aux_heater V17
+#define BLYNK_VIRTUAL_temp_out V18
+#define BLYNK_VIRTUAL_hum_out V19
+#define BLYNK_VIRTUAL_temp_in V20
+#define BLYNK_VIRTUAL_hum_in V21
 
 #define USE_GPS_SPEED true // use GPS for speed Signal
 
@@ -135,6 +140,7 @@
 // for Dalles DS18B20 Temperatursensor
 #define ONEWIRE
 #define ONE_WIRE_BUS 6
+#define ONE_WIRE_BUS_PORT 0x07 // need this declaration for plausibility check
 
 // I2S Sensors
 #define I2C

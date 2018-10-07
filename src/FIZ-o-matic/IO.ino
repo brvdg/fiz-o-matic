@@ -32,12 +32,12 @@ unsigned long IO_timer = 0;
 void IO_init() {
 
   #ifdef ALARM_OUT
-  pinMode(ALARM_PORT, OUTPUT);
+  /*pinMode(ALARM_PORT, OUTPUT);
 
   digitalWrite(ALARM_PORT, HIGH);
   delay(100);
   digitalWrite(ALARM_PORT, LOW);
-  delay(100);
+  delay(100);*/
   #endif //ALARM_OUT
 
 
@@ -81,6 +81,15 @@ void IO_init() {
   attachInterrupt(A5, interrupt_A5, FALLING); // attach interrupt
   reg_port(0x06, TYPE_Hz);      // register port
   #endif
+
+  #ifdef GPIO6
+  reg_port(0x07, TYPE_undef);
+  #endif
+
+  #ifdef GPIO13
+  reg_port(0x08, TYPE_undef);
+  #endif
+
 
   #ifdef U8G2_DISPLAY_BG_LED
   analogWrite(U8G2_DISPLAY_BG_LED, DIMMER_MIN);
@@ -186,15 +195,7 @@ void get_bord_voltage() {
 
 #ifdef U8G2_DISPLAY_BG_LED
 void dimmer() {
-  /*switch (dimmer_port) {
-    case 1: dimmer_V = a0_V; break;
-    case 2: dimmer_V = a1_V; break;
-    case 3: dimmer_V = a2_V; break;
-    case 4: dimmer_V = a3_V; break;
-  }*/
-
   dimmer_V = get_port_value(dimmer_port);
-
 
   int dimmer_val = 0;
 
@@ -204,7 +205,12 @@ void dimmer() {
     if (running) {
       dimmer_pct = 5;
     } else {
-      dimmer_pct = 0;
+      if ( dimmer_active_timer > millis() ) {
+        dimmer_pct = (dimmer_active * 100 ) / dimmer_max;
+      }
+      else {
+        dimmer_pct = 0;
+      }
     }
   }
 
@@ -416,6 +422,43 @@ void read_ports() {
   update_port_value(0x06, a5_hz);
 
 
+  #ifdef GPIO13
+  //Serial.print("#GPIO13");
+  for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
+    if ( port_values[i].port == 0x08 ) {
+      if ( port_values[i].output ) {
+        //Serial.println("#GPIO13 is anoutput port");
+        if ( port_values[i].value != 0 ) {
+          //Serial.println("#13 on");
+          digitalWrite(13, HIGH);
+        }
+        else {
+          digitalWrite(13, LOW);
+          //Serial.println("#13 off");
+        }
+      }
+      break;
+    }
+  }
+  #endif
+
+  #ifdef GPIO6
+  for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
+    if ( port_values[i].port == 0x07 ) {
+      if ( port_values[i].output ) {
+        if ( port_values[i].value != 0 ) {
+          digitalWrite(6, HIGH);
+        }
+        else {
+          digitalWrite(6, LOW);
+        }
+      }
+      break;
+    }
+  }
+  #endif
+
+
   message(DEBUG_IO, F("#Ports: "));
   message(DEBUG_IO, String(a0_V));
   message(DEBUG_IO, F(" V, "));
@@ -469,14 +512,13 @@ void print_port_values() {
 void reg_port(byte port_address, byte type) {
 
   for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
-    //Serial.print("Slot: ");
-    //Serial.print(i, DEC);
-    //Serial.print(" used by ");
-    //Serial.println(port_values[i].port, HEX);
 
+    // The array has a fixed size. So find the next unused position.
     if ( port_values[i].port == 0x00 ) {
       port_values[i].port = port_address;
       port_values[i].type = type;
+      port_values[i].output = false;
+
 
       //message(INFO_MSG, F("Slot: "));
       //message(INFO_MSG, String(i, DEC));
@@ -486,6 +528,28 @@ void reg_port(byte port_address, byte type) {
       }
       message(INFO_MSG , String(port_values[i].port, HEX));
       message(INFO_MSG , F("\n"));
+      break;
+    }
+  }
+}
+
+void set_port_output(byte port_address) {
+  for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
+    if ( port_values[i].port == port_address ) {
+      port_values[i].output = true;
+      switch (port_address) {
+        case 0x07:
+          pinMode(6, OUTPUT);
+          digitalWrite(6, LOW);
+          break;
+        case 0x08:
+          pinMode(13, OUTPUT);
+          digitalWrite(13, LOW);
+          break;
+        default:
+          message(INFO_MSG , F("#ERROR: port is not usable as output\n"));
+          break;
+      }
       break;
     }
   }

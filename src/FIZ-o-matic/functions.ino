@@ -104,14 +104,15 @@ void trip() {
 
 
 
-void parse_config_string(String inputString) {
+boolean parse_config_string(String inputString) {
 
   String tmp;
   boolean found = false;
 
   inputString.trim();
+  message(DEBUG_MSG, F("#"));
   message(DEBUG_MSG, inputString);
-  message(DEBUG_MSG, F("\n"));
+  //message(DEBUG_MSG, F("\n"));
 
   if ( inputString.startsWith("#") ) {
     //SD_DEBUG_PRINTLN(F("found comment"));
@@ -122,32 +123,32 @@ void parse_config_string(String inputString) {
   else if ( inputString.startsWith("sim_pin=") ) {
     sim_pin=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn=") ) {
     apn=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn_user=") ) {
     apn_user=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn_pass=") ) {
     apn_pass=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("blynk_key=") ) {
     blynk_key=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("sms_keyword=") ) {
     sms_keyword=getValue( inputString, '=', 1 );
     found = true;
-    message(INFO_MSG, (F("OK\n")));
+    //message(INFO_MSG, (F("OK\n")));
   }
   else {
     for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
@@ -155,21 +156,19 @@ void parse_config_string(String inputString) {
         tmp = getValue( inputString, '=', 1 );
         *config[i].config = tmp.toInt();
         found = true;
-        message(INFO_MSG, (F("OK\n")));
+        //message(INFO_MSG, (F("OK\n")));
       }
     }
 
     for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
       if ( inputString.startsWith(ports[i].name) ) {
         tmp = getValue( inputString, '=', 1 );
-        //Serial.println(tmp);
-        //Serial.println(tmp.toInt());
-        //String tmp_dec = strtoui( tmp, nullptr, 16);
-        //Serial.println(StrToHex(tmp), DEC);
-        //*ports[i].port = tmp.toInt();
         *ports[i].port = StrToInt(tmp);
         found = true;
-        message(INFO_MSG, (F("OK\n")));
+        if ( ports[i].output ) {
+          message(DEBUG_MSG, (F(" (as output) ")));
+          set_port_output(*ports[i].port);
+        }
       }
     }
 
@@ -178,14 +177,14 @@ void parse_config_string(String inputString) {
         tmp = getValue( inputString, '=', 1 );
         if ( tmp.startsWith(F("true")) ) {
           *features[i].feature = true;
-          message(INFO_MSG, (F("OK\n")));
+          //message(INFO_MSG, (F("OK\n")));
         }
         else if ( tmp.startsWith(F("false")) ) {
           *features[i].feature = false;
-          message(INFO_MSG, (F("OK\n")));
+          //message(INFO_MSG, (F("OK\n")));
         }
         else {
-          message(F("ERROR: use only 'true' or 'false'"));
+          message(F("#ERROR: use only 'true' or 'false'"));
         }
         found = true;
       }
@@ -193,10 +192,12 @@ void parse_config_string(String inputString) {
   }
 
   if ( found ) {
-    //message(DEBUG_MSG, (F("OK\n")));
+    message(DEBUG_MSG, (F(" -> OK\n")));
+    return true;
   }
   else {
-    Serial.println(F("error unknown command"));
+    //Serial.println(F("#error unknown command"));
+    return false;
   }
 
 }
@@ -219,6 +220,7 @@ int StrToInt(String str)
 
 void check_plausibility() {
 
+  // check BLYNK config if tinygsm is enabled
   if ( tinygsm_enabled ) {
     if ( blynk_key.equals(BLYNK_KEY) ) {
       message( ERROR, F("blynk_key is not set\n"));
@@ -236,9 +238,22 @@ void check_plausibility() {
     blynk_report = false;
   }
 
+  // if SD Cart isn't enabled, disable logging
   if ( !sd_enabled ) {
     sd_logging = false;
   }
+
+  // checking ports if 1Wire is enabled
+  if ( onewire_enabled ) {
+    for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
+      if ( *ports[i].port == ONE_WIRE_BUS_PORT ) {
+        message( ERROR, F("1Wire Port isn't free\n"));
+        onewire_enabled = false;
+      }
+    }
+  }
+
+
 }
 
 
@@ -408,6 +423,7 @@ void notify(byte type, String msg) {
     info_type = 1;
     info_text = msg;
     MsgTimer = millis() + 10000;
+    dimmer_active_timer = MsgTimer;
 
   }
   if (bitRead(type,1)) {
@@ -430,6 +446,7 @@ void notify(byte type, String msg) {
 
   if (bitRead(type,4)) {
     //BLYNK_MSG
+    blynk_msg(msg);
   }
   if (bitRead(type,5)) {
     //BLYNK_PUSH
@@ -480,6 +497,7 @@ void button() {
         display_loop();
         #endif
         online_intervall_timer = online_intervall_timer + 10000;
+
         //#endif
       }
       else {
@@ -528,7 +546,16 @@ void button() {
         }
         }*/
       else if ((button_1_low >= 1) && (button_1_high >= 1)) {
-        button_1 = 1;
+
+        if ( ( !running ) && dimmer_active_timer < millis() ) {
+          //button_1 = 0;
+          dimmer_active_timer = millis() + 10000;
+        }
+        else {
+          button_1 = 1;
+          dimmer_active_timer = millis() + 10000;
+        }
+
         button_1_high = 0;
         button_1_low = 0;
         button_1_double = 0;

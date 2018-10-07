@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "180906a"
+#define BUILD "181006a"
 
 
 #include <stdarg.h>
@@ -53,10 +53,10 @@ RTCZero rtc;
 void setup() {
 
   #ifdef DEBUG
-  delay(3000);
+  delay(5000);
   #endif
 
-  delay(3000);
+  //delay(3000);
 
   Serial.begin(9600);
   //delay(2000);
@@ -73,6 +73,7 @@ void setup() {
    */
   #ifdef U8G2_DISPLAY
   display_init();
+  dimmer_active_timer = millis() + 1000 * 30; // 30 sec.
   #endif
 
   notify(BOOTMSG, F("#Booting..."));
@@ -83,6 +84,8 @@ void setup() {
   /*
    * IO
    */
+  IO_init();
+
   #ifdef FeatherLED8
   pinMode(FeatherLED8, OUTPUT);
   digitalWrite(FeatherLED8, LOW);
@@ -131,7 +134,7 @@ void setup() {
   //reg_port(0x05, TYPE_Hz);
   //reg_port(0x06, TYPE_Hz);
 
-  IO_init();
+  //IO_init();
 
   /*reg_port(0xC1);
   reg_port(0xC2);
@@ -149,28 +152,13 @@ void setup() {
   /*
    * OneWire Bus
    */
-  onewire_init();
-
+  if ( onewire_enabled ) {
+    onewire_init();
+  }
   /*
    * I2C Sensors
    */
   i2c_init();
-
-  /*
-   * decide the temp sensors
-   */
-  /*if ( lm75_1_available ) {
-    temp_out_port = 1;
-    message(INFO_MSG ,F("#LM75 for temp. out\n"));
-  }
-  else if ( onewire_available ) {
-    temp_out_port = 2;
-    message(INFO_MSG ,F("#DS18B20 for temp. out\n"));
-  }
-  else {
-    message(INFO_MSG ,F("#nothing for temp. out\n"));
-  }*/
-
 
   /*
    * RTC
@@ -229,8 +217,6 @@ void setup() {
   #endif // CUSTOM
 
 
-  //set_alarm(1000,50,10, false);
-
 
   // Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
@@ -247,7 +233,7 @@ void setup() {
 
   Scheduler.startLoop(loop1);
 
-  //notify(BOOTMSG, "---> Ready after " + String(millis(), DEC));
+
   message(F("#---> Ready after "));
   message(String(millis()/1000, DEC));
   message(F("s\n"));

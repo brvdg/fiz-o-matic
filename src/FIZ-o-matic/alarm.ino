@@ -7,7 +7,11 @@ void alarm_loop() {
 
   if ( alarm_counter > 0 ) {
     if ( alarm_on_timer > millis() ) {
-      digitalWrite(ALARM_PORT, HIGH);
+      //digitalWrite(ALARM_PORT, HIGH);
+      if ( alarm_port != 0x00 ) {
+        update_port_value(alarm_port, 1);
+        read_ports();
+      }
       if ( blink_bg_led ) {
         #ifdef U8G2_DISPLAY_BG_LED
         analogWrite(U8G2_DISPLAY_BG_LED, 255);
@@ -15,7 +19,11 @@ void alarm_loop() {
       }
     }
     else if ( alarm_off_timer > millis() ) {
-      digitalWrite(ALARM_PORT, LOW);
+      //digitalWrite(ALARM_PORT, LOW);
+      if ( alarm_port != 0x00 ) {
+        update_port_value(alarm_port, 0);
+        read_ports();
+      }
       if ( blink_bg_led ) {
         #ifdef U8G2_DISPLAY_BG_LED
         analogWrite(U8G2_DISPLAY_BG_LED, 0);
