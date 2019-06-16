@@ -10,6 +10,7 @@
 
 //#include <Adafruit_GFX.h>
 #include "Adafruit_LEDBackpack.h"
+#include <Adafruit_ADS1015.h>
 
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 char displaybuffer[4] = {' ', ' ', ' ', ' '};
@@ -27,6 +28,11 @@ const uint16_t fonttable[] =  {
   0b0000000011101111 // 9
 };
 
+// ADS1115 ADC
+Adafruit_ADS1115 ads_0(0x48);  /* Use this for the 16-bit version */
+Adafruit_ADS1115 ads_1(0x49);
+Adafruit_ADS1115 ads_2(0x4A);
+Adafruit_ADS1115 ads_3(0x4B);
 
 unsigned long i2c_timer = 0;
 
@@ -74,11 +80,13 @@ void i2c_init() {
       message(INFO_MSG ,F("  !\n"));
 
       switch(address) {
-        case 64:
+        case 0x40:
         //case 76:
           si7021_available = true;
           //INFO_PRINTLN(F("#SI7021 found!"));
           notify(BOOTMSG, F("SI7021 found"));
+          reg_port(0x69, TYPE_GradCelsius);
+          reg_port(0x6A, TYPE_Humidity);
           //delay(2000);
           break;
         case 0x70:
@@ -111,37 +119,69 @@ void i2c_init() {
           //delay(2000);
           break;
         case 0x48:
-          //si7021_available = true;
-          //INFO_PRINTLN(F("#ADS1115 found!"));
           notify(BOOTMSG, F("ADS1115 found"));
-          //delay(2000);
-          break;
-        case 0x76:
-          bmp280_available = true;
-          //INFO_PRINTLN(F("#BMP280 found!"));
-          notify(BOOTMSG, F("BMP280 found"));
-          //delay(2000);
+          reg_port(0x80, TYPE_Volt);
+          reg_port(0x81, TYPE_Volt);
+          reg_port(0x82, TYPE_Volt);
+          reg_port(0x83, TYPE_Volt);
+          ads1115_0_available = true;
+
+          ads_0.begin();
+          ads_0.setGain(GAIN_TWOTHIRDS);
           break;
         case 0x49:
+          notify(BOOTMSG, F("ADS1115 found"));
+          reg_port(0x84, TYPE_Volt);
+          reg_port(0x85, TYPE_Volt);
+          reg_port(0x86, TYPE_Volt);
+          reg_port(0x87, TYPE_Volt);
+          ads1115_1_available = true;
+
+          ads_1.begin();
+          break;
+        case 0x4A:
+          notify(BOOTMSG, F("ADS1115 found"));
+          reg_port(0x88, TYPE_Volt);
+          reg_port(0x89, TYPE_Volt);
+          reg_port(0x8A, TYPE_Volt);
+          reg_port(0x8B, TYPE_Volt);
+          ads1115_2_available = true;
+
+          ads_2.begin();
+          break;
+
+        case 0x4B:
+          notify(BOOTMSG, F("ADS1115 found"));
+          reg_port(0x8C, TYPE_Volt);
+          reg_port(0x8D, TYPE_Volt);
+          reg_port(0x8E, TYPE_Volt);
+          reg_port(0x8F, TYPE_Volt);
+          ads1115_3_available = true;
+
+          ads_3.begin();
+          break;
+
+        case 0x76:
+          bmp280_available = true;
+          notify(BOOTMSG, F("BMP280 found"));
+          break;
+        /*case 0x49:
           lm75_1_available = true;
           //INFO_PRINTLN(F("#LM75 (#1) found!"));
           notify(BOOTMSG, F("LM75 (#1) found"));
           reg_port(0x60, TYPE_GradCelsius);
           //delay(2000);
-          break;
-        case 0x4A:
+          break;*/
+        /*case 0x4A:
           lm75_2_available = true;
           //INFO_PRINTLN(F("#LM75 (#2) found!"));
           notify(BOOTMSG, F("LM75 (#2) found"));
           reg_port(0x61, TYPE_GradCelsius);
           //delay(2000);
-          break;
+          break;*/
         case 0x50:
           //case 76:
-          //si7021_available = true;
-          //INFO_PRINTLN(F("#SI7021 found!"));
           notify(BOOTMSG, F("EEPROM found"));
-          //delay(2000);
           break;
       }
 
@@ -159,33 +199,6 @@ void i2c_init() {
     }
   }
 
-  /*if (nDevices == 0) {
-    DEBUG_PRINT(F("#No I2C devices found\n"));
-  }
-  else {
-    DEBUG_PRINT(F("done\n"));
-  }*/
-
-
-
-
-  //#ifdef SI7021
-  /*if ( si7021_available ) {
-    Wire.beginTransmission(0x40);
-    delay(200);
-
-    if ( temp_out_port == 0 ) {
-      temp_out_port = 2;
-    }
-  }
-  else {
-    if ( temp_out_port == 2 ) {
-      temp_out_port = 0;
-    }
-  }*/
-  //#endif
-
-  //Wire.begin();
   delay(100);
 
   Wire.endTransmission();
@@ -198,14 +211,17 @@ void i2c_loop() {
     if ( !I2C_lock ) {
       I2C_lock = true;
 
-      //#ifdef SI7021
       if (si7021_available) i2c_get_si7021();
-      //#endif // SI7021
 
       if (lm75_1_available) i2c_get_lm75(1);
       if (lm75_2_available) i2c_get_lm75(2);
 
       if (ht16k33_available) i2c_ht16k33();
+
+      if (ads1115_0_available) i2c_ads1115(0);
+      if (ads1115_1_available) i2c_ads1115(1);
+      if (ads1115_2_available) i2c_ads1115(2);
+      if (ads1115_3_available) i2c_ads1115(3);
 
       I2C_lock = false;
     }
@@ -238,6 +254,7 @@ void i2c_get_si7021() {
   //TRACE_PRINT(si7021_temperature);
 
   si7021_temp = si7021_temperature*10;
+  update_port_value(0x69, si7021_temperature);
 
   // read humidity
   Wire.beginTransmission(0x40);
@@ -257,6 +274,7 @@ void i2c_get_si7021() {
     hd2 = (125*hd2)/65536;
     //Y = hd1+hd2;
     si7021_humidity = hd1+hd2-6;
+    update_port_value(0x6A, hd1+hd2-6);
   }
 
   //TRACE_PRINT(F(", si7021_humidity: "));
@@ -333,5 +351,64 @@ void i2c_ht16k33() {
   alpha4.writeDisplay();*/
 }
 
+void i2c_ads1115(int device) {
+  int16_t adc0, adc1, adc2, adc3;
+
+  switch(device){
+    case 0:
+      adc0 = ads_0.readADC_SingleEnded(0);
+      adc1 = ads_0.readADC_SingleEnded(1);
+      adc2 = ads_0.readADC_SingleEnded(2);
+      adc3 = ads_0.readADC_SingleEnded(3);
+      //Serial.println(adc0, DEC);
+      update_port_value(0x80, float((adc0 * 0.1875) / 1000));
+      update_port_value(0x81, float((adc1 * 0.1875) / 1000));
+      update_port_value(0x82, float((adc2 * 0.1875) / 1000));
+      update_port_value(0x83, float((adc3 * 0.1875) / 1000));
+      break;
+    case 1:
+      adc0 = ads_1.readADC_SingleEnded(0);
+      adc1 = ads_1.readADC_SingleEnded(1);
+      adc2 = ads_1.readADC_SingleEnded(2);
+      adc3 = ads_1.readADC_SingleEnded(3);
+      update_port_value(0x84, float((adc0 * 0.1875) / 1000));
+      update_port_value(0x85, float((adc1 * 0.1875) / 1000));
+      update_port_value(0x86, float((adc2 * 0.1875) / 1000));
+      update_port_value(0x87, float((adc3 * 0.1875) / 1000));
+      break;
+    case 2:
+      adc0 = ads_2.readADC_SingleEnded(0);
+      adc1 = ads_2.readADC_SingleEnded(1);
+      adc2 = ads_2.readADC_SingleEnded(2);
+      adc3 = ads_2.readADC_SingleEnded(3);
+      update_port_value(0x88, float((adc0 * 0.1875) / 1000));
+      update_port_value(0x89, float((adc1 * 0.1875) / 1000));
+      update_port_value(0x8A, float((adc2 * 0.1875) / 1000));
+      update_port_value(0x8B, float((adc3 * 0.1875) / 1000));
+      break;
+    case 3:
+      adc0 = ads_3.readADC_SingleEnded(0);
+      adc1 = ads_3.readADC_SingleEnded(1);
+      adc2 = ads_3.readADC_SingleEnded(2);
+      adc3 = ads_3.readADC_SingleEnded(3);
+      update_port_value(0x8C, float((adc0 * 0.1875) / 1000));
+      update_port_value(0x8D, float((adc1 * 0.1875) / 1000));
+      update_port_value(0x8E, float((adc2 * 0.1875) / 1000));
+      update_port_value(0x8F, float((adc3 * 0.1875) / 1000));
+      break;
+}
+
+
+
+
+  /*Serial.print("AIN0: "); Serial.println(adc0);
+  Serial.print("AIN1: "); Serial.println(adc1);
+  Serial.print("AIN2: "); Serial.println(adc2);
+  Serial.print("AIN3: "); Serial.println(adc3);
+  Serial.println(" ");*/
+
+
+
+}
 
 #endif // I2C

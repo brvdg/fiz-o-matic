@@ -72,6 +72,7 @@
 #define LAYOUT3_3_Y Ysize/2 + Ypos - big_font_high/2
 
 // Layout Nr. 4
+// e.g. Trip, Clima and Options Menue
 #define LAYOUT4_1_X Xpos
 #define LAYOUT4_1_Y Ypos
 #define LAYOUT4_2_X Xpos + 12
@@ -163,6 +164,14 @@
 
 #endif
 
+/*
+ * Layout and Logo for
+ * OLED with SH1106
+ */
+#ifdef OLED_FULL
+#include <u8g2_OLED_FULL.h>
+
+#endif
 
 
 /*
@@ -419,7 +428,7 @@ void menu_trip() {
 /*
  * SD Card
  */
-void menu_sdcard() {
+/*void menu_sdcard() {
   #ifdef SDCARD
 
   u8g2.setFont(small_font);
@@ -630,6 +639,9 @@ void menu_info() {
 void menu_optionen() {
 
   if ( engine_running) {
+    MainMenuPos++;
+  }
+  if ( no_long_press ) {
     MainMenuPos++;
   }
 

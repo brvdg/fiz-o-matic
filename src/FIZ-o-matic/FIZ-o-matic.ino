@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "181006a"
+#define BUILD "190610b"
 
 
 #include <stdarg.h>
@@ -18,13 +18,7 @@
 #include <avr/dtostrf.h>
 #include <Scheduler.h>
 
-/*
- * Copy the .bin file to the SD card and rename
- * the file to UPDATE.bin.
- */
-#if defined SDCARD
-#include <SDU.h>
-#endif
+
 
 // Include EEPROM-like API for FlashStorage
 #include <FlashAsEEPROM.h>
@@ -47,7 +41,24 @@ RTCZero rtc;
 #include <U8g2lib.h>
 #endif
 
+/*
+ * Copy the .bin file to the SD card and rename
+ * the file to UPDATE.bin.
+ */
+//#if defined SDU
+//#error "<SDU.h>"
+#include <SDU.h>
+//#endif
 
+
+/*
+ * Timer Interrupts
+ */
+#include "Adafruit_ZeroTimer.h"
+Adafruit_ZeroTimer zt4 = Adafruit_ZeroTimer(4);
+void TC4_Handler(){
+  Adafruit_ZeroTimer::timerHandler(4);
+}
 
 
 void setup() {
@@ -72,8 +83,12 @@ void setup() {
    * Display
    */
   #ifdef U8G2_DISPLAY
+  //delay(10000);
+  //Serial.println("DISPLAY...");
   display_init();
-  dimmer_active_timer = millis() + 1000 * 30; // 30 sec.
+  dimmer_active_timer = millis() + 1000 * 90; // 30 sec.
+  display_active_timer = millis() + 1000 * 90; // 30 sec.
+
   #endif
 
   notify(BOOTMSG, F("#Booting..."));
@@ -172,6 +187,7 @@ void setup() {
   // set time for Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
 
+/*
   // Enable clock for TC
   REG_GCLK_CLKCTRL = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID ( GCM_TCC2_TC3 ) ) ;
   while ( GCLK->STATUS.bit.SYNCBUSY == 1 ); // wait for sync
@@ -198,7 +214,7 @@ void setup() {
   // Enable TC
   TC->CTRLA.reg |= TC_CTRLA_ENABLE;
   while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-
+*/
 
   //
   /********************* Timer #3, 8 bit, one callback with adjustable period = 350KHz ~ 2.86us for DAC updates */
@@ -210,6 +226,19 @@ void setup() {
   zt3.setPeriodMatch(150, 1, 0); // ~350khz, 1 match, channel 0
   zt3.setCallback(true, TC_CALLBACK_CC_CHANNEL0, Timer3Callback0);  // set callback
   zt3.enable(true);*/
+
+
+  /********************* Timer #4, 8 bit, one callback with adjustable period */
+  zt4.configure(TC_CLOCK_PRESCALER_DIV1024, // prescaler
+                TC_COUNTER_SIZE_32BIT,   // bit width of timer/counter
+                TC_WAVE_GENERATION_MATCH_PWM  // match style
+                );
+
+  zt4.setPeriodMatch(150, 100, 0); // 1 match, channel 0
+  zt4.setCallback(true, TC_CALLBACK_CC_CHANNEL0, Timer4Callback0);  // set DAC in the callback
+  zt4.enable(true);
+
+
 
   // at least custom functions
   #ifdef CUSTOM
@@ -320,18 +349,12 @@ void loop() {
   if ( display_update_timer < millis() ) {
     display_update_timer = millis() + U8G2_DISPLAY_UPDATE_TIMER;
     display_loop();
+    //Serial.println("DISPLAY...");
   }
   #endif // U8G2_DISPLAY
 
   // Button...
   button();
-
-  // Status Checker
-  //status_checker();
-
-  //alarm = 1;
-  //make_alarm();
-  //alarm_loop();
 
   // at least custom functions
   #ifdef CUSTOM
@@ -362,6 +385,7 @@ void loop1 () {
 /*
  *   Internal Timer
  */
+ /*
 void TC3_Handler()
 {
 
@@ -384,7 +408,30 @@ void TC3_Handler()
     }
 
     // Button ...
-    button();
+    //button();
   }
+
+}*/
+
+
+void Timer4Callback0()
+{
+  //Serial.print(F("."));
+  if ( alarm_timer < millis() ) {
+    alarm_timer = millis() + ALARM_TIMER;
+    alarm_loop();
+
+  }
+
+  // Wagchdog
+  if ( watchdog_timer < millis() ) {
+      // reset the system
+      Serial.println(F("#Watchdog reset"));
+      flash_watchdog_reset.write(true);
+      NVIC_SystemReset();
+  }
+
+  // Button ...
+  button();
 
 }

@@ -380,7 +380,7 @@ void serial_print_help() {
   Serial.print( F("Version: ") );
   Serial.println( F(VERSION) );
 
-  Serial.print( F("Buid: ") );
+  Serial.print( F("Build: ") );
   Serial.print( F(__DATE__) );
   Serial.print( F(", ") );
   Serial.println( F(__TIME__) );

@@ -186,6 +186,13 @@ static unsigned char logo[] = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 #endif
 
+#ifdef OLED_FULL
+U8G2_SH1106_128X64_NONAME_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ U8G2_DISPLAY_CS, /* dc=*/ U8G2_DISPLAY_DC, /* reset=*/ U8G2_DISPLAY_RST);
+
+
+
+#endif
+
 
 
 #define sign_info_width 16
@@ -219,9 +226,21 @@ void display_loop() {
       month = rtc.getMonth();
       year = rtc.getYear() + 2000;
 
+#if defined OLED || defined OLED_FULL
+      if ( ( display_active_timer > millis() ) || ( engine_running ) ) {
+        display_update_timer_lock = true;
+        u8g2.setPowerSave(false);
+        display_update();
+        display_update_timer_lock = false;
+      }
+      else {
+        u8g2.setPowerSave(true);
+      }
+#else
       display_update_timer_lock = true;
       display_update();
       display_update_timer_lock = false;
+#endif
 
       //display_set_led();
     }
@@ -261,14 +280,15 @@ void display_draw(void) {
       case MENU_trip: menu_trip(); break;
       case MENU_values: menu_values(); break;
       case MENU_gpsinfo: menu_gpsinfo(); break;
-      case MENU_gpsinfo2: menu_gpsinfo2(); break;
-      //    case MENU_power: menu_power(); break;
-      case MENU_sdcard: menu_sdcard(); break;
+      //case MENU_gpsinfo2: menu_gpsinfo2(); break;
+      //case MENU_power: menu_power(); break;
+      //case MENU_sdcard: menu_sdcard(); break;
       //case MENU_water_temp: menu_water_temp(); break;
       case MENU_clima: menu_clima(); break;
       case MENU_info: menu_info(); break;
       //case MENU_fuel: menu_fuel(); break;
       //case MENU_rpm: menu_rpm(); break;
+
       case MENU_optionen: menu_optionen(); break;
 
       case MENU_opt_config: menu_opt_config(); break;

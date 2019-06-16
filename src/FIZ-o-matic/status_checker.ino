@@ -185,6 +185,7 @@ void check_online() {
   // exit if BLYNK is disabled
   //if ( enable_blynk != 1 ) return;
   if ( !blynk_enabled ) return;
+  if ( !tinygms_ok ) return;
 
   //message(DEBUG_MSG, F("#check_online\n"));
 

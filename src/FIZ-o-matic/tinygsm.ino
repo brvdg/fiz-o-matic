@@ -67,17 +67,44 @@ unsigned long tinygsm_blynk_timer = 0;
 
 void tinygsm_init()
 {
-
+  //message(F("#TinyGSM Init\n"));
+  notify(BOOTMSG, F("#Initializing TinyGSM"));
   if ( !tinygsm_enabled ) {
     notify(BOOTMSG, F("TinyGSM disabled"));
     return;
   }
 
+  #ifdef TinyGSM_PWRKEY
+  pinMode(TinyGSM_PWRKEY, OUTPUT);
+  digitalWrite(TinyGSM_PWRKEY, HIGH);
+  delay(500);
+  digitalWrite(TinyGSM_PWRKEY, LOW);
+  delay(1500);
+  digitalWrite(TinyGSM_PWRKEY, HIGH);
+  delay(1000);
+  #endif
 
-  notify(BOOTMSG, F("#Initializing TinyGSM"));
+
+
   //TINYGSM_DEBUG_PRINTLN(F("#tinygsm_init"));
   // Set GSM module baud rate
-  Serial1.begin(115200);
+  //Serial1.begin(115200);
+  // Set GSM module baud rate
+  //message(String(TinyGsmAutoBaud(Serial1), DEC));
+
+  if ( TinyGsmAutoBaud(Serial1) == 0 ) {
+    message(F("#TinyGSM is off. Turn it on.\n"));
+    #ifdef TinyGSM_PWRKEY
+    //digitalWrite(TinyGSM_RESET, HIGH);
+    //delay(1500);
+    digitalWrite(TinyGSM_PWRKEY, LOW);
+    delay(1500);
+    digitalWrite(TinyGSM_PWRKEY, HIGH);
+    delay(1000);
+    #endif
+    TinyGsmAutoBaud(Serial1);
+  }
+
 
   // Restart takes quite some time
   // To skip it, call init() instead of restart()
@@ -271,7 +298,7 @@ void tinygsm_gps_init() {
   if ( !modem.enableGPS() ) {
     //INFO_PRINTLN(F("can't enable GPS"));
     message(DEBUG_TINYGSM, F("#can't enable GPS\n"));
-    notify(2, F("#GPS failed"));
+    notify(2, F("GPS failed"));
     tinygsm_gps_ok = false;
   }
   else {
@@ -301,6 +328,9 @@ void tinygsm_loop()
     message(DEBUG_TINYGSM, F("#go_online is finished\n"));
   }
 
+  if ( display_active_timer > millis() &&  alarm_system_triggered == false ) {
+    return;
+  }
 
   // Check SMS
   if ( ( tinygsm_sms_timer < millis() ) && ( sim_ok ) ) {

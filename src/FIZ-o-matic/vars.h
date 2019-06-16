@@ -183,6 +183,10 @@ boolean bmp280_available = false;
 boolean lm75_1_available = false;
 boolean lm75_2_available = false;
 boolean ht16k33_available = false;
+boolean ads1115_0_available = false;
+boolean ads1115_1_available = false;
+boolean ads1115_2_available = false;
+boolean ads1115_3_available = false;
 
 int si7021_temp = -127;
 int si7021_hum = 0;
@@ -279,6 +283,8 @@ unsigned long MsgTimer = 0;
 //byte clock_view = CLOCK_VIEW;
 unsigned long display_update_timer = 0;
 boolean display_update_timer_lock = false;
+
+unsigned long display_active_timer = 0;
 
 int MenuValuesPos = 0;
 int MenuConfigPos = 0;
@@ -466,6 +472,7 @@ struckt_value_maps map_water_temp[32] = {
 #define TYPE_Prozent 4
 #define TYPE_kmh 5
 #define TYPE_System 6
+#define TYPE_Humidity 7
 
 
 struct struct_port_values {
@@ -542,7 +549,7 @@ const struct_ports ports[] = {
   {"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"temp_out_port", "Temp. outsite", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"temp_out_port", "Temp. outsise", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"alarm_port", "Alarm", &alarm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true},
   {"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
@@ -559,6 +566,7 @@ struct struct_config {
 
 const struct_config config[] = {
   //{"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
+  {"online_interval", "Online Intervall (min)", &online_interval, 5, 240, 5},
   {"lastfile_config", "Last Log File (x10)", &lastfile_config, 1, 99, 1},
   {"dimmer_max", "Dimmer Max.", &dimmer_max, 5, 255, 0},
   {"dimmer_min", "Dimmer Min.", &dimmer_min, 5, 255, 0},
@@ -568,7 +576,6 @@ const struct_config config[] = {
   {"water_temp_warning", "Water Temp Warning", &water_temp_warning, 5, 130, 80},
   {"oil_temp_warning", "Oil Temp Warning", &oil_temp_warning, 5, 150, 80},
   {"oil_press_warning", "Oil Press. Warning (/10)", &oil_press_warning, 1, 10, 1},
-  {"online_interval", "Online Intervall (min)", &online_interval, 5, 240, 5},
 //  {"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, 1, 10, 1},
 //  {"aux_heating_mode", "Aux. Heating Mode", &aux_heating_mode, 1, 2, 0},
   {"aux_heating_time", "Aux. Heating Time", &aux_heating_time, 5, 200, 0}
@@ -605,8 +612,8 @@ struct struct_features {
 };
 
 const struct_features features[] {
-  {"sd_enabled", "SD Card", &sd_enabled},
-  {"sd_logging", "SD Logging", &sd_logging},
+  //{"sd_enabled", "SD Card", &sd_enabled},
+  //{"sd_logging", "SD Logging", &sd_logging},
   {"tinygsm_enabled", "TinyGSM enabled", &tinygsm_enabled},
   //{"internet_enabled", "Internet enabled", &internet_enabled},
   {"blynk_enabled", "BLYNK enabled", &blynk_enabled},

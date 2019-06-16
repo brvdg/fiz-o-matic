@@ -424,6 +424,8 @@ void notify(byte type, String msg) {
     info_text = msg;
     MsgTimer = millis() + 10000;
     dimmer_active_timer = MsgTimer;
+    display_active_timer = MsgTimer;
+
 
   }
   if (bitRead(type,1)) {
@@ -485,8 +487,11 @@ void button() {
     if ( !button_timer_lock ) {
       button_timer_lock = true;
 
-      if (digitalRead(BUTTON_PIN_1) == LOW) {
-        digitalWrite(8, HIGH);
+      if (digitalRead(BUTTON_PIN_1) == BUTTON_PRESSED) {
+        #ifdef FeatherLED8
+        digitalWrite(FeatherLED8, HIGH);
+        #endif FeatherLED8
+
         button_1_low++;
         button_1_high = 0;
         //#ifdef DEBUG
@@ -494,19 +499,24 @@ void button() {
         //TRACE_PRINTLN(button_1_low, DEC);
         //TRACE_PRINTLN(button_1_high, DEC);
         #ifdef U8G2_DISPLAY
-        display_loop();
+        //display_loop();
         #endif
-        online_intervall_timer = online_intervall_timer + 10000;
+        //online_intervall_timer = online_intervall_timer + 10000;
 
         //#endif
       }
       else {
-        digitalWrite(8, LOW);
+        //digitalWrite(8, LOW);
         button_1_high++;
       }
       // long press
       if ((button_1_low == 10) && (button_1_high == 0)) {
-        button_1 = 2;
+        if (no_long_press) {
+          button_1 = 1;
+        }
+        else {
+          button_1 = 2;
+        }
         button_1_high = 0;
         //#ifdef DEBUG
         //TRACE_PRINTLN(F("#long press"));
@@ -514,7 +524,13 @@ void button() {
       }
       // long press released
       else if ((button_1_low >= 10) && (button_1_high >= 1)) {
-        button_1 = 3;
+        if (no_long_press) {
+          button_1 = 1;
+        }
+        else {
+          button_1 = 3;
+        }
+        //button_1 = 3;
         button_1_high = 0;
         button_1_low = 0;
         //#ifdef DEBUG
@@ -529,6 +545,7 @@ void button() {
         //TRACE_PRINTLN(F("#long press repeat"));
         //#endif
       }
+
 
       /*else if ((button_1_low >= 1) && (button_1_high == 1)) {
         if ( button_1_double == 1 ) {
@@ -547,13 +564,16 @@ void button() {
         }*/
       else if ((button_1_low >= 1) && (button_1_high >= 1)) {
 
+
         if ( ( !running ) && dimmer_active_timer < millis() ) {
           //button_1 = 0;
-          dimmer_active_timer = millis() + 10000;
+          dimmer_active_timer = millis() + 30000;
+          display_active_timer = millis() + 30000;
         }
         else {
           button_1 = 1;
-          dimmer_active_timer = millis() + 10000;
+          dimmer_active_timer = millis() + 30000;
+          display_active_timer = millis() + 30000;
         }
 
         button_1_high = 0;

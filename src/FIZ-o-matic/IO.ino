@@ -67,6 +67,12 @@ void IO_init() {
   #ifdef A3_MULTIPLICATOR
   reg_port(0x04, TYPE_Volt);
   #endif
+  #ifdef A4_MULTIPLICATOR
+  reg_port(0x05, TYPE_Volt);
+  #endif
+  #ifdef A5_MULTIPLICATOR
+  reg_port(0x06, TYPE_Volt);
+  #endif
 
   #ifdef A4_COUNTER
   pinMode(A4, INPUT);           // set pin to input

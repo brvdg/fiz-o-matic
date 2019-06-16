@@ -1,0 +1,9 @@
+Reference, Quantity, Value, Footprint, Datasheet
+C1 C2 C3 ,3,"1uF","C050-035X075",""
+C4 ,1,"220","Capacitors_THT:CP_Radial_D8.0mm_P3.80mm",""
+JP2 ,1,"~","1X08",""
+LED2 ,1,"EA_LED39X41_MONO","EA_LED39X41",""
+R3 ,1,"~","0204V",""
+R4 ,1,"4k7","0204V",""
+T1 ,1,"BC547","TO92-CBE",""
+U$1 ,1,"EA_DOGS102-6","EA_DOGS102-6",""

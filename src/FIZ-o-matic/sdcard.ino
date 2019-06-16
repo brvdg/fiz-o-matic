@@ -19,14 +19,14 @@ void sdcard_init() {
   message(DEBUG_SD, F("#->enable_sdcard\n"));
   if ( !SPI_lock ) {
     SPI_lock = true;
-    for (int i = 0; i<2; i++) {
+    for (int i = 0; i<5; i++) {
 
       SPI_lock = false;
       notify(BOOTMSG, F("#Init SD Card"));
       SPI_lock = true;
       // initialize the SD card at SPI_HALF_SPEED to avoid bus errors with
       // breadbords.  use SPI_FULL_SPEED for better performance.
-      if (!SD.cardBegin(SD_CS, SPI_FULL_SPEED)) {
+      if (!SD.cardBegin(SD_CS, SPI_HALF_SPEED)) {
         SPI_lock = false;
         notify(BOOTMSG, F("cardBegin failed"));
         message(ERROR, F("cardBegin failed\n"));
@@ -615,6 +615,25 @@ void dateTime(uint16_t* date, uint16_t* time) {
 
 #else
 // dummy functions
-void sdcard_save_config();
+void sdcard_save_config()
+{}
+void sdcard_init()
+{}
+void sdcard_open_config()
+{}
+void get_last_log()
+{}
+void log_to_sdcard(){}
+void sdcard_free()
+{}
+void dump_file(int filenumber) {}
+void dump_sd_card()
+{}
+void sdcard_ls()
+{}
+void open_file()
+{}
+void close_file()
+{}
 
 #endif //SDCARD

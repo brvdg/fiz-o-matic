@@ -12,8 +12,10 @@
 //#define HW_TRINKET
 
 // Display Configuration
+//#define U8G2_DISPLAY
 //#define DOGS102
 //#define OLED
+//#define OLED_FULL
 //#define NOKIA
 
 
@@ -113,8 +115,8 @@
 // Fuel gauge
 #define FUEL_GAUGE_PORT 3
 #define FUEL_GAUGERESISTOR 55
-#define FUEL_FULL 34
-#define FUEL_EMPTY 168
+#define FUEL_FULL 35
+#define FUEL_EMPTY 290
 #define FUEL_L 60
 #define FUEL_WARNING 15
 
@@ -153,6 +155,7 @@
    The Watchdog is based on an timer interrrupt
 */
 #define WATCHDOG_TIMER 5 * 60000 // 120s
+//#define WATCHDOG_TIMER 50 // 120s
 
 
 /*
