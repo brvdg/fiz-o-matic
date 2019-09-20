@@ -44,7 +44,7 @@
 
 
 //TinyGSM configuration
-#define TinyGSM
+//#define TinyGSM
 #define SIM_PIN ""
 #define APN "internet.t-mobile"
 #define APN_USER "t-mobile"
@@ -88,7 +88,10 @@
 /*
     Temperature source
 */
-#define TEMP_OUT_PORT 0x60
+#define TEMP_OUT_PORT 0xF3
+#define HUM_OUT_PORT 0xF4
+#define TEMP_IN_PORT 0xF5
+#define HUM_IN_PORT 0xF6
 
 /*
    Speed source
@@ -108,12 +111,14 @@
 #define RPM_MULTIPL 2
 
 // Water Temp gauge
-#define WATER_TEMP 4
+//#define WATER_TEMP 0x03
+#define WATER_TEMP 0x80
 #define SERIESRESISTOR 50 // Ohm of the original gauge
 #define WATER_TEMP_WARNING 110
 
 // Fuel gauge
-#define FUEL_GAUGE_PORT 3
+//#define FUEL_GAUGE_PORT 0x04
+#define FUEL_GAUGE_PORT 0x81
 #define FUEL_GAUGERESISTOR 55
 #define FUEL_FULL 35
 #define FUEL_EMPTY 290

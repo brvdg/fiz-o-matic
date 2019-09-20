@@ -353,7 +353,8 @@ void read_virtual_eeprom() {
     message (DEBUG_MSG, F("\n"));
 
   } else {
-    display_bootmsg(F("config flash is empty"));
+    //display_bootmsg(F("config flash is empty"));
+    notify(BOOTMSG, F("config flash is empty"));
   }
 }
 
@@ -422,9 +423,10 @@ void notify(byte type, String msg) {
     //DISPLAY_INFO
     info_type = 1;
     info_text = msg;
-    MsgTimer = millis() + 10000;
-    dimmer_active_timer = MsgTimer;
-    display_active_timer = MsgTimer;
+    display_notify();
+    //MsgTimer = millis() + 10000;
+    //dimmer_active_timer = MsgTimer;
+    //display_active_timer = MsgTimer;
 
 
   }
@@ -432,7 +434,10 @@ void notify(byte type, String msg) {
     //DISPLAY_WARNING
     info_type = 2;
     info_text = msg;
-    MsgTimer = millis() + 10000;
+    display_notify();
+    //MsgTimer = millis() + 10000;
+    //dimmer_active_timer = MsgTimer;
+    //display_active_timer = MsgTimer;
 
   }
 
@@ -462,9 +467,9 @@ void notify(byte type, String msg) {
     message(F("\n"));
 
   }
-  #ifdef U8G2_DISPLAY
-  display_update();
-  #endif // U8G2_DISPLAY
+  //#ifdef U8G2_DISPLAY
+  //display_update();
+  //#endif // U8G2_DISPLAY
 
 }
 
@@ -588,6 +593,27 @@ void button() {
     //  Serial.println(F("#button locked..."));
     //}
   }
+}
+
+bool next() {
+  if ( button_1 == 1 ) {
+    button_1 = 0;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool enter() {
+  if ( button_1 == 2 ) {
+    button_1 = 0;
+    return true;
+  }
+  else {
+    return false;
+  }
+
 }
 
 

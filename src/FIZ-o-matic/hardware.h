@@ -7,24 +7,36 @@
 
 
 #ifdef OLED
+#define ENABLE_DISPLAY
 #define U8G2_DISPLAY
-#define U8G2_DISPLAY_CS 11
-#define U8G2_DISPLAY_DC 12
-#define U8G2_DISPLAY_RST 10
+#define DSP_PWRSAVE
+#define DISPLAY_CS 11
+#define DISPLAY_DC 12
+#define DISPLAY_RST 10
 #endif
 
-#ifdef OLED_FULL
+#ifdef OLEDFULL
+#define ENABLE_DISPLAY
 #define U8G2_DISPLAY
-#define U8G2_DISPLAY_CS 11
-#define U8G2_DISPLAY_DC 12
-#define U8G2_DISPLAY_RST 10
+#define DSP_PWRSAVE
+#define DISPLAY_CS 11
+#define DISPLAY_DC 12
+#define DISPLAY_RST 10
 #endif
 
 #if defined DOGS102
+#define ENABLE_DISPLAY
 #define U8G2_DISPLAY
-#define U8G2_DISPLAY_BG_LED 10 //turn this off if a OLED ist used
-#define U8G2_DISPLAY_CS 11
-#define U8G2_DISPLAY_DC 12
+#define DISPLAY_BG_LED 10
+#define DISPLAY_CS 11
+#define DISPLAY_DC 12
+#endif
+
+#if defined ST7735
+#define ENABLE_DISPLAY
+#define DISPLAY_CS 10
+#define DISPLAY_DC 12
+#define DISPLAY_RST 11
 #endif
 
 #if defined TOUCHBUTTON
@@ -49,6 +61,7 @@ bool no_long_press = false;
 #endif //HW_TRINKET
 
 #if defined HW_FEATHER
+#define TinyGSM
 // enable SD card
 //#define SDCARD
 //#define SD_CS 4
@@ -57,8 +70,10 @@ bool no_long_press = false;
 // LED on Feather board for running status
 #define FeatherLED8 8
 
+#if defined TinyGSM
 // TinyGSM Reset
 #define TinyGSM_PWRKEY 5
+#endif
 
 /*
    analog input multiplicator

@@ -1,8 +1,6 @@
 #ifdef ALARM_OUT
 
 
-
-
 void alarm_loop() {
 
   if ( alarm_counter > 0 ) {

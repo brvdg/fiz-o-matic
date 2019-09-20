@@ -11,19 +11,45 @@
  ****************************************************/
 
 
-#ifdef U8G2_DISPLAY2
+#ifdef U8G2_DISPLAY
 
-#ifdef ARDUINO_ARCH_SAMD
+#include <U8g2lib.h>
 
+void u8g2_init(void) {
+    u8g2.begin();
+    u8g2.drawXBM(LOGO_Xpos, LOGO_Ypos, LOGO_width, LOGO_height, logo);
+    u8g2_update();
+}
 
+void display_draw() {
+  u8g2.sendBuffer();					// transfer internal memory to the display
+}
 
+void u8g2_update(void) {
+  u8g2.sendBuffer();					// transfer internal memory to the display
+  //if ( !SPI_lock ) {
+  //  SPI_lock = true;
+  //  message(TRACE_MSG, F("#->display_update\n"));
+  //  u8g2.firstPage();
+  //  do {
+      //display_loop();
+  //  } while ( u8g2.nextPage() );
+  //  SPI_lock = false;
+  //}
+}
 
+void clear_screen() {
+  u8g2.clearDisplay();
+}
 
+void display_blink(bool blink) {
+
+}
 /*
  * Display MENUs
  */
 
-void display_notify() {
+void menu_notify() {
 
   switch ( info_type ) {
     case 1:
@@ -203,7 +229,7 @@ void menu_gpsinfo() {
 
   switch (button_1) {
     case 1: MainMenuPos++; break;
-    case 2: MainMenuPos = MENU_gpsinfo2; break;
+    //case 2: MainMenuPos = MENU_gpsinfo2; break;
   }
   button_1 = 0;
 
@@ -845,6 +871,5 @@ void menu_debug_ports_2() {
 }
 
 
-//#endif // DOGS102
-#endif // ARDUINO_ARCH_SAMD
+
 #endif // U8G2_DISPLAY

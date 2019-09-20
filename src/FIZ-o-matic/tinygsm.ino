@@ -7,7 +7,7 @@
  ****************************************************/
 
 
-//#ifdef TinyGSM
+#ifdef TinyGSM
 
 // Default heartbeat interval for GSM is 60
 // If you want override this value, uncomment and set this option:
@@ -298,7 +298,8 @@ void tinygsm_gps_init() {
   if ( !modem.enableGPS() ) {
     //INFO_PRINTLN(F("can't enable GPS"));
     message(DEBUG_TINYGSM, F("#can't enable GPS\n"));
-    notify(2, F("GPS failed"));
+    //notify(2, F("GPS failed"));
+    notify(DISPLAY_INFO, F("GPS failed"));
     tinygsm_gps_ok = false;
   }
   else {
@@ -819,4 +820,4 @@ BLYNK_WRITE(BLYNK_VIRTUAL_aux_heater) {
     }
   }
 }
-//#endif // TinyGSM
+#endif // TinyGSM

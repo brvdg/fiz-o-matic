@@ -5,6 +5,9 @@
  *
  ****************************************************/
 
+
+bool fuel_notified = false;
+
 void status_checker() {
   if ( status_checker_timer < millis() ) {
 
@@ -26,6 +29,8 @@ void status_checker() {
       engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
     }
 
+    check_water_temp();
+    check_fuel();
 
     check_auxiliary_heating();
 
@@ -104,6 +109,11 @@ void check_engine() {
       else {
         blynk_msg(F("geo fence is disabled"));
       }
+
+      // reset notification states
+      ignore_notify = false;
+      fuel_notified = false;
+
     }
   }
 }
@@ -217,7 +227,18 @@ void check_online() {
     }
   }
   else {
-    message(TRACE_MSG, F("#stay_online\n"));
+    if ( stay_online ) {
+      message(TRACE_MSG, F("#stay online (stay_online=true)\n"));
+    }
+    else if ( engine_running ) {
+      message(TRACE_MSG, F("#stay online (engine_running=true)\n"));
+    }
+    else if ( alarm_system_triggered ) {
+      message(TRACE_MSG, F("#stay online (alarm_system_triggered=true)\n"));
+    }
+    else if ( geo_fence_alarm ) {
+      message(TRACE_MSG, F("#stay online (geo_fence_alarm=true)\n"));
+    }
   }
 
   //check the online state
@@ -238,4 +259,37 @@ void check_online() {
       }
     }
   }*/
+}
+
+
+void check_water_temp() {
+  if ( water_temp != 255 ) {
+    if ( water_temp > water_temp_warning ) {
+      //sprintf (buf, "%3d \xf7 C", int(water_temp));
+      //buf += (char)247;
+      //buf += "C";
+      //info_val = buf;
+
+      /*for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
+        if (port_values[i].name = F("water_temp")){
+          info_val = i;
+          break;
+        }
+      }*/
+      info_val = int(water_temp);
+      info_unit = "dgC";
+
+      notify(DISPLAY_WARNING + SOUND_INFO, F("Wassertemperatur"));
+    }
+    else if ( millis() <= MsgTimer ) {
+      info_val = int(water_temp);
+    }
+  }
+}
+
+void check_fuel() {
+  if ( ( fuel_l < 10 ) && (!fuel_notified) ){
+    notify(DISPLAY_INFO + SOUND_INFO, F("TANKEN!"));
+    fuel_notified = true;
+  }
 }

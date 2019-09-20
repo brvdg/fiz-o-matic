@@ -12,6 +12,7 @@
 #include "Adafruit_LEDBackpack.h"
 #include <Adafruit_ADS1015.h>
 
+
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 char displaybuffer[4] = {' ', ' ', ' ', ' '};
 
@@ -29,10 +30,10 @@ const uint16_t fonttable[] =  {
 };
 
 // ADS1115 ADC
-Adafruit_ADS1115 ads_0(0x48);  /* Use this for the 16-bit version */
-Adafruit_ADS1115 ads_1(0x49);
-Adafruit_ADS1115 ads_2(0x4A);
-Adafruit_ADS1115 ads_3(0x4B);
+Adafruit_ADS1015 ads_0(0x48);  /* Use this for the 16-bit version */
+Adafruit_ADS1015 ads_1(0x49);
+Adafruit_ADS1015 ads_2(0x4A);
+Adafruit_ADS1015 ads_3(0x4B);
 
 unsigned long i2c_timer = 0;
 
@@ -119,18 +120,18 @@ void i2c_init() {
           //delay(2000);
           break;
         case 0x48:
-          notify(BOOTMSG, F("ADS1115 found"));
+          notify(BOOTMSG, F("ADS1x15 found"));
           reg_port(0x80, TYPE_Volt);
           reg_port(0x81, TYPE_Volt);
-          reg_port(0x82, TYPE_Volt);
-          reg_port(0x83, TYPE_Volt);
+          //reg_port(0x82, TYPE_Volt);
+          //reg_port(0x83, TYPE_Volt);
           ads1115_0_available = true;
 
           ads_0.begin();
-          ads_0.setGain(GAIN_TWOTHIRDS);
+          ads_0.setGain(GAIN_ONE);
           break;
         case 0x49:
-          notify(BOOTMSG, F("ADS1115 found"));
+          notify(BOOTMSG, F("ADS1x15 found"));
           reg_port(0x84, TYPE_Volt);
           reg_port(0x85, TYPE_Volt);
           reg_port(0x86, TYPE_Volt);
@@ -140,7 +141,7 @@ void i2c_init() {
           ads_1.begin();
           break;
         case 0x4A:
-          notify(BOOTMSG, F("ADS1115 found"));
+          notify(BOOTMSG, F("ADS1x15 found"));
           reg_port(0x88, TYPE_Volt);
           reg_port(0x89, TYPE_Volt);
           reg_port(0x8A, TYPE_Volt);
@@ -151,7 +152,7 @@ void i2c_init() {
           break;
 
         case 0x4B:
-          notify(BOOTMSG, F("ADS1115 found"));
+          notify(BOOTMSG, F("ADS1x15 found"));
           reg_port(0x8C, TYPE_Volt);
           reg_port(0x8D, TYPE_Volt);
           reg_port(0x8E, TYPE_Volt);
@@ -218,10 +219,10 @@ void i2c_loop() {
 
       if (ht16k33_available) i2c_ht16k33();
 
-      if (ads1115_0_available) i2c_ads1115(0);
-      if (ads1115_1_available) i2c_ads1115(1);
-      if (ads1115_2_available) i2c_ads1115(2);
-      if (ads1115_3_available) i2c_ads1115(3);
+      if (ads1115_0_available) i2c_ads1x15(0);
+      if (ads1115_1_available) i2c_ads1x15(1);
+      if (ads1115_2_available) i2c_ads1x15(2);
+      if (ads1115_3_available) i2c_ads1x15(3);
 
       I2C_lock = false;
     }
@@ -351,20 +352,24 @@ void i2c_ht16k33() {
   alpha4.writeDisplay();*/
 }
 
-void i2c_ads1115(int device) {
+void i2c_ads1x15(int device) {
   int16_t adc0, adc1, adc2, adc3;
+  float multiplier = 2.0F * 6;
 
   switch(device){
     case 0:
-      adc0 = ads_0.readADC_SingleEnded(0);
-      adc1 = ads_0.readADC_SingleEnded(1);
-      adc2 = ads_0.readADC_SingleEnded(2);
-      adc3 = ads_0.readADC_SingleEnded(3);
+      //adc0 = ads_0.readADC_SingleEnded(0);
+      //adc1 = ads_0.readADC_SingleEnded(1);
+      //adc2 = ads_0.readADC_SingleEnded(2);
+      //adc3 = ads_0.readADC_SingleEnded(3);
+
+      adc0 = ads_0.readADC_Differential_0_1();
+      adc1 = ads_0.readADC_Differential_2_3();
       //Serial.println(adc0, DEC);
-      update_port_value(0x80, float((adc0 * 0.1875) / 1000));
-      update_port_value(0x81, float((adc1 * 0.1875) / 1000));
-      update_port_value(0x82, float((adc2 * 0.1875) / 1000));
-      update_port_value(0x83, float((adc3 * 0.1875) / 1000));
+      update_port_value(0x80, float((adc0 * multiplier) / 1000));
+      update_port_value(0x81, float((adc1 * multiplier) / 1000));
+      //update_port_value(0x82, float((adc2 * 0.1875) / 1000));
+      //update_port_value(0x83, float((adc3 * 0.1875) / 1000));
       break;
     case 1:
       adc0 = ads_1.readADC_SingleEnded(0);

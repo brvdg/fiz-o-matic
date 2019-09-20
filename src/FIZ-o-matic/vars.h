@@ -61,6 +61,7 @@ byte debug = 0;
 #define BLYNK_PUSH 32
 #define SMS 64
 #define BOOTMSG 128
+bool ignore_notify = false;
 
 
 /*
@@ -74,6 +75,8 @@ byte debug = 0;
  */
 byte info_type = 0;
 String info_text;
+int info_val = 0;
+String info_unit = "";
 
 
 /*
@@ -83,11 +86,11 @@ String info_text;
 float temp_out = 0;
 byte temp_out_port = TEMP_OUT_PORT;
 float hum_out = 0;
-byte hum_out_port = 0;
+byte hum_out_port = HUM_OUT_PORT;
 float temp_in = 0;
-byte temp_in_port = 0;
+byte temp_in_port = TEMP_IN_PORT;
 float hum_in = 0;
-byte hum_in_port = 0;
+byte hum_in_port = HUM_IN_PORT;
 
 
 int ds18b20_temp = -127;
@@ -251,6 +254,8 @@ float a0_V = 0;
 float a1_V = 0;
 float a2_V = 0;
 float a3_V = 0;
+float a4_V = 0;
+float a5_V = 0;
 int a4_int = 0;
 int a5_int = 0;
 float a4_hz = 0;
@@ -262,6 +267,8 @@ float a0_tmp[IO_ARRAY];
 float a1_tmp[IO_ARRAY];
 float a2_tmp[IO_ARRAY];
 float a3_tmp[IO_ARRAY];
+float a4_tmp[IO_ARRAY];
+float a5_tmp[IO_ARRAY];
 
 
 

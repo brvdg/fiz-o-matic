@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "190610b"
+#define BUILD "190820a"
 
 
 #include <stdarg.h>
@@ -45,10 +45,10 @@ RTCZero rtc;
  * Copy the .bin file to the SD card and rename
  * the file to UPDATE.bin.
  */
-//#if defined SDU
+#if defined SDU
 //#error "<SDU.h>"
 #include <SDU.h>
-//#endif
+#endif
 
 
 /*
@@ -82,7 +82,8 @@ void setup() {
   /*
    * Display
    */
-  #ifdef U8G2_DISPLAY
+  //#ifdef U8G2_DISPLAY
+  #ifdef ENABLE_DISPLAY
   //delay(10000);
   //Serial.println("DISPLAY...");
   display_init();
@@ -142,12 +143,18 @@ void setup() {
    * initialize the IO Ports
    */
 
-  //reg_port(0x01, TYPE_Volt);
-  //reg_port(0x02, TYPE_Volt);
-  //reg_port(0x03, TYPE_Volt);
-  //reg_port(0x04, TYPE_Volt);
-  //reg_port(0x05, TYPE_Hz);
-  //reg_port(0x06, TYPE_Hz);
+  reg_port(0xF1, TYPE_Volt);
+  reg_port(0xF2, TYPE_Volt);
+  reg_port(0xF3, TYPE_GradCelsius);
+  reg_port(0xF4, TYPE_Humidity);
+  reg_port(0xF5, TYPE_GradCelsius);
+  reg_port(0xF6, TYPE_Humidity);
+  update_port_value( 0xF1, 8.4 );
+  update_port_value( 0xF2, 6.8 );
+  update_port_value( 0xF3, 12.3 );
+  update_port_value( 0xF4, 80 );
+  update_port_value( 0xF5, 23.4 );
+  update_port_value( 0xF6, 64 );
 
   //IO_init();
 
@@ -251,8 +258,12 @@ void setup() {
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
 
 
-  #ifdef U8G2_DISPLAY
-  MainMenuPos = 1;
+  //#ifdef U8G2_DISPLAY
+  #ifdef ENABLE_DISPLAY
+
+  if ( MainMenuPos == 0 ) {
+    MainMenuPos = 1;
+  }
   //boot = false;
   display_update_timer_lock = true;
   display_update();
@@ -345,7 +356,8 @@ void loop() {
   // get the Port values
   IO_loop();
 
-  #ifdef U8G2_DISPLAY
+  //#ifdef U8G2_DISPLAY
+  #ifdef ENABLE_DISPLAY
   if ( display_update_timer < millis() ) {
     display_update_timer = millis() + U8G2_DISPLAY_UPDATE_TIMER;
     display_loop();

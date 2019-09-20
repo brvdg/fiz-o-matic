@@ -135,7 +135,7 @@ void IO_loop() {
 
     get_rpm();
 
-    get_clima_out();
+    get_clima();
 
     get_speed();
 
@@ -151,24 +151,51 @@ void vw_water_temp() {
   float val=0;
   float temp = 0;
 
+  int array_size = sizeof(vw_temp)/sizeof(vw_temp[0]);
+
   water_temp = 0;
 
-  switch (water_temp_port) {
+  val = get_port_value(water_temp_port);
+
+  /*switch (water_temp_port) {
     case 1: val = a0_V; break;
     case 2: val = a1_V; break;
     case 3: val = a2_V; break;
     case 4: val = a3_V; break;
-  }
+  }*/
 
   float ohm = SERIESRESISTOR * (val / (10 - val));
   water_temp_ohm = ohm;
 
-  for (int i=0; i<sizeof(vw_temp)/sizeof(vw_temp[0]);i++) {
-    if (ohm > vw_temp[i][0] ) {
-      water_temp = pgm_read_word_near(&vw_temp[i][1]);
-      i=sizeof(vw_temp)/sizeof(vw_temp[0]);
+  //Serial.print(F("#WATER OHM: "));
+  //Serial.println(ohm);
+
+  if ( ohm > vw_temp[0][0] ) {
+    water_temp = 0;
+  }
+  else if ( ohm < vw_temp[array_size-1][0] ) {
+    //Serial.println(vw_temp[array_size-1][0]);
+    water_temp = 255;
+  }
+  else {
+    for (int i=0; i<array_size;i++) {
+      if (ohm > vw_temp[i][0] ) {
+        //temp = pgm_read_word_near(&vw_temp[i][1]);
+        //temp = pgm_read_word_near(&vw_temp[i-1][1]);
+
+        float temp_ohm = pgm_read_word_near(&vw_temp[i-1][0]) - ohm;
+        float ohm_diff = pgm_read_word_near(&vw_temp[i][0]) - pgm_read_word_near(&vw_temp[i-1][0]);
+        float temp_diff = pgm_read_word_near(&vw_temp[i-1][1]) - pgm_read_word_near(&vw_temp[i][1]);
+        water_temp = int( pgm_read_word_near(&vw_temp[i][1]) + (temp_diff / ohm_diff ) * temp_ohm );
+
+        i=sizeof(vw_temp)/sizeof(vw_temp[0]);
+      }
     }
   }
+
+  //Serial.print(F("#WATER TEMP: "));
+  //Serial.println(water_temp);
+
 }
 
 void get_bord_voltage() {
@@ -251,23 +278,21 @@ void get_rpm() {
 
 }
 
-void get_clima_out() {
-  /*switch (temp_out_port) {
-    case 1:
-      temp_out = lm75_1_temp;
-      hum_out = -1000;
-      break;
-    case 2:
-      temp_out = ds18b20_temp;
-      hum_out = -1000;
-      break;
-    case 3:
-      temp_out = si7021_temp;
-      hum_out = si7021_hum;
-      break;
-  }*/
+void get_clima() {
 
-  temp_out = get_port_value(temp_out_port);
+  if ( temp_out_port != 0 ) {
+    temp_out = get_port_value(temp_out_port);
+  }
+  if ( hum_out_port != 0 ) {
+    hum_out = get_port_value(hum_out_port);
+  }
+  if ( temp_in_port != 0 ) {
+    temp_in = get_port_value(temp_in_port);
+  }
+  if ( hum_in_port != 0 ) {
+    hum_in = get_port_value(hum_in_port);
+  }
+
 }
 
 
@@ -327,12 +352,14 @@ void get_speed() {
 
 void get_fuel() {
   //TRACE_PRINTLN(F("#get_fuel()"));
-  switch (fuel_port) {
+  fuel_V = get_port_value(fuel_port);
+
+  /*switch (fuel_port) {
     case 1: fuel_V = a0_V; break;
     case 2: fuel_V = a1_V; break;
     case 3: fuel_V = a2_V; break;
     case 4: fuel_V = a3_V; break;
-  }
+  }*/
 
   //TRACE_PRINT(F("#FUEL VOLTAGE: "));
   //TRACE_PRINTLN(fuel_V);
@@ -358,6 +385,8 @@ void read_ports() {
   float a1_sum = 0;
   float a2_sum = 0;
   float a3_sum = 0;
+  float a4_sum = 0;
+  float a5_sum = 0;
 
 
   //a0_V = analogRead(A0) * A0_MULTIPLICATOR;
@@ -365,6 +394,7 @@ void read_ports() {
   //a2_V = analogRead(A2) * A2_MULTIPLICATOR;
   //a3_V = analogRead(A3) * A3_MULTIPLICATOR;
 
+  message(DEBUG_IO, F("#Ports: "));
 
   // for port A0 on address 0x01
   #ifdef A0_MULTIPLICATOR
@@ -378,6 +408,10 @@ void read_ports() {
   a0_V = a0_sum / IO_ARRAY;
 
   update_port_value( 0x01, analogRead(A0) * A0_MULTIPLICATOR);
+
+  message(DEBUG_IO, String(a0_V));
+  message(DEBUG_IO, F(" V, "));
+
   #endif
 
   #ifdef A1_MULTIPLICATOR
@@ -393,6 +427,10 @@ void read_ports() {
 
   update_port_value( 0x02, analogRead(A1) * A1_MULTIPLICATOR);
   a1_V = analogRead(A1) * A1_MULTIPLICATOR;
+
+  message(DEBUG_IO, String(a1_V));
+  message(DEBUG_IO, F(" V, "));
+
   #endif
 
   #ifdef A2_MULTIPLICATOR
@@ -407,6 +445,10 @@ void read_ports() {
   a2_V = a2_sum / IO_ARRAY;
 
   update_port_value( 0x03, analogRead(A2) * A2_MULTIPLICATOR);
+
+  message(DEBUG_IO, String(a2_V));
+  message(DEBUG_IO, F(" V, "));
+
   #endif
 
   #ifdef A3_MULTIPLICATOR
@@ -421,11 +463,61 @@ void read_ports() {
   a3_V = a3_sum / IO_ARRAY;
 
   update_port_value( 0x04, analogRead(A3) * A3_MULTIPLICATOR);
+
+  message(DEBUG_IO, String(a3_V));
+  message(DEBUG_IO, F(" V, "));
+
   #endif
 
+  #ifdef A4_MULTIPLICATOR
+  // for port A3
+  a4_tmp[IO_ARRAY-1] = analogRead(A4) * A4_MULTIPLICATOR;
+  for (int i = 0; i < IO_ARRAY-1; i++) {
+
+    a4_tmp[i] = a4_tmp[i+1];
+    a4_sum += a4_tmp[i];
+  }
+  a4_sum += a4_tmp[IO_ARRAY-1];
+  a4_V = a4_sum / IO_ARRAY;
+
+  update_port_value( 0x05, analogRead(A4) * A4_MULTIPLICATOR);
+
+  message(DEBUG_IO, String(a4_V));
+  message(DEBUG_IO, F(" V, "));
+
+  #endif
+
+  #ifdef A5_MULTIPLICATOR
+  // for port A3
+  a5_tmp[IO_ARRAY-1] = analogRead(A5) * A5_MULTIPLICATOR;
+  for (int i = 0; i < IO_ARRAY-1; i++) {
+
+    a5_tmp[i] = a5_tmp[i+1];
+    a5_sum += a5_tmp[i];
+  }
+  a5_sum += a5_tmp[IO_ARRAY-1];
+  a5_V = a5_sum / IO_ARRAY;
+
+  update_port_value( 0x06, analogRead(A5) * A5_MULTIPLICATOR);
+
+  message(DEBUG_IO, String(a5_V));
+  message(DEBUG_IO, F(" V, "));
+
+  #endif
+
+
   // updatin print_port_values
+  #ifdef A4_COUNTER
   update_port_value(0x05, a4_hz);
+  message(DEBUG_IO, String(a4_hz));
+  message(DEBUG_IO, F(" Hz, "));
+  #endif
+
+  #ifdef A5_COUNTER
   update_port_value(0x06, a5_hz);
+  message(DEBUG_IO, String(a5_hz));
+  message(DEBUG_IO, F(" Hz\n"));
+  #endif
 
 
   #ifdef GPIO13
@@ -465,19 +557,9 @@ void read_ports() {
   #endif
 
 
-  message(DEBUG_IO, F("#Ports: "));
-  message(DEBUG_IO, String(a0_V));
-  message(DEBUG_IO, F(" V, "));
-  message(DEBUG_IO, String(a1_V));
-  message(DEBUG_IO, F(" V, "));
-  message(DEBUG_IO, String(a2_V));
-  message(DEBUG_IO, F(" V, "));
-  message(DEBUG_IO, String(a3_V));
-  message(DEBUG_IO, F(" V, "));
-  message(DEBUG_IO, String(a4_hz));
-  message(DEBUG_IO, F(" Hz, "));
-  message(DEBUG_IO, String(a5_hz));
-  message(DEBUG_IO, F(" Hz\n"));
+
+
+
 }
 
 void interrupt_A4()
@@ -487,8 +569,8 @@ void interrupt_A4()
   a4_time = micros();
   a4_hz = 1000000 / diff;
 
-
 }
+
 
 void interrupt_A5()
 {

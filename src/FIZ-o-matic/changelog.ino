@@ -1,4 +1,10 @@
-/* 180906a
+/*
+ * 190920
+ * - add LCD ST7735
+ * - updated u8g2 functions
+ *
+ *
+ * 180906a
  * - many things... I forgot to write the changelog
  *
  * 180225a
