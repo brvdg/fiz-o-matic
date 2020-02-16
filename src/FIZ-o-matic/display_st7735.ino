@@ -13,7 +13,8 @@
 #include <Fonts/FreeSansBold24pt7b.h>
 
 
-Adafruit_ST7735 tft = Adafruit_ST7735(DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);
+//Adafruit_ST7735 tft = Adafruit_ST7735(DISPLAY_CS, DISPLAY_DC, DISPLAY_RST);
+Adafruit_ST7735 tft = Adafruit_ST7735(DISPLAY_CS, DISPLAY_DC, -1);
 
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -226,6 +227,13 @@ unsigned long blink_off_timer = 0;
 
 
 void st7735_init(void) {
+
+  pinMode(DISPLAY_ON, OUTPUT);
+
+  digitalWrite(DISPLAY_ON, LOW);
+  delay(100);
+  digitalWrite(DISPLAY_ON, HIGH);
+
   tft.initR();
 
   tft.setRotation(0);
@@ -236,7 +244,34 @@ void st7735_init(void) {
   tft.print(F("Booting..."));
 }
 
+bool display_pwrsave() {
+  #if defined DSP_PWRSAVE
+    if ( ( display_active_timer > millis() ) || ( engine_running ) ) {
+      //message(F(" Cannot initialize modem!\n"));
+      digitalWrite(DISPLAY_ON, HIGH);
+      return false;
+    }
+    else {
+      digitalWrite(DISPLAY_ON, LOW);
+      return true;
+    }
+  #endif
+  return false;
+}
+
 void display_draw() {
+  /*
+  #if defined DSP_PWRSAVE
+    if ( ( display_active_timer > millis() ) || ( engine_running ) ) {
+      //message(F(" Cannot initialize modem!\n"));
+      digitalWrite(DISPLAY_ON, HIGH);
+    }
+    else {
+      digitalWrite(DISPLAY_ON, LOW);
+    }
+  #endif
+  yield();
+  */
 }
 
 void notifyscreen() {
@@ -411,7 +446,7 @@ void clear_screen() {
 #define HOME_TIME_Y 66
 
 void menu_clock() {
-  temp_out = 28.6;
+  //temp_out = 28.6;
 
   tft.setFont();
   //clear_screen();
@@ -521,7 +556,7 @@ void draw_time() {
 }
 
 void draw_temp() {
-  temp_out = 28.6;
+  //temp_out = 28.6;
   if ( old_temp != temp_out ) {
     //tft.fillRect(0, TEMP_LINE+2, Xsize, 40, BGCOLOR);
     tft.drawLine(0, TEMP_LINE, Xsize, TEMP_LINE, FONTCOLOR);
@@ -568,7 +603,7 @@ void draw_trip() {
 
 
 void menu_speed() {
-  temp_out = 28.6;
+  //temp_out = 28.6;
 
   tft.setFont();
 
@@ -866,12 +901,6 @@ void menu_gpsinfo() {
 
 }
 
-/*
- * Options Menu
- */
-void menu_optionen() {
-  MainMenuPos++;
-}
 
 /*
  * Info Menu
@@ -893,6 +922,41 @@ void menu_info() {
   tft.setCursor(VALUE_X-12, VALUE_Y+80);
   tft.print(F("fiz-o-matic.net"));
 
+}
+
+/*
+ * Options Menu
+ */
+void menu_optionen() {
+  MainMenuPos++;
+}
+
+
+/*
+ * Dynamic Menu for config parameters
+ */
+void menu_opt_config() {
+  MainMenuPos++;
+}
+
+void menu_opt_features() {
+  MainMenuPos++;
+}
+
+void menu_opt_ports() {
+  MainMenuPos++;
+}
+
+void menu_save_config() {
+  MainMenuPos++;
+}
+
+void menu_debug_ports() {
+  MainMenuPos++;
+}
+
+void menu_debug_ports_2() {
+  MainMenuPos++;
 }
 
 void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {

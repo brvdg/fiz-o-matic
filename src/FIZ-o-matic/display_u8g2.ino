@@ -22,20 +22,32 @@ void u8g2_init(void) {
 }
 
 void display_draw() {
-  u8g2.sendBuffer();					// transfer internal memory to the display
+
+    u8g2.sendBuffer();					// transfer internal memory to the display
+
+
 }
 
 void u8g2_update(void) {
+
   u8g2.sendBuffer();					// transfer internal memory to the display
-  //if ( !SPI_lock ) {
-  //  SPI_lock = true;
-  //  message(TRACE_MSG, F("#->display_update\n"));
-  //  u8g2.firstPage();
-  //  do {
-      //display_loop();
-  //  } while ( u8g2.nextPage() );
-  //  SPI_lock = false;
-  //}
+
+
+}
+
+bool display_pwrsave() {
+  #if defined OLED || defined OLED_FULL || defined DSP_PWRSAVE
+    if ( ( display_active_timer > millis() ) || ( engine_running ) ) {
+      u8g2.setPowerSave(false);
+      u8g2.sendBuffer();					// transfer internal memory to the display
+      return false;
+    }
+    else {
+      u8g2.setPowerSave(true);
+      return true;
+    }
+  #endif
+  return false;
 }
 
 void clear_screen() {
@@ -462,7 +474,17 @@ void menu_values() {
     u8g2.setCursor(LAYOUT3_3_X, LAYOUT3_3_Y);
     u8g2.print(values[MenuValuesPos].suffix);
 
-    switch (button_1) {
+    if ( next() ) {
+      if (MenuValuesPos+1 >= (sizeof(values) / sizeof(values[0])) ) {
+        MainMenuPos++;
+        MenuValuesPos = 0;
+      } else {
+        MenuValuesPos++;
+        clear_screen();
+      }
+    }
+
+    /*switch (button_1) {
       case 1:
         if (MenuValuesPos+1 >= (sizeof(values) / sizeof(values[0])) ) {
           MainMenuPos++;
@@ -473,7 +495,7 @@ void menu_values() {
         break;
       case 2: MainMenuPos--; break;
     }
-    button_1 = 0;
+    button_1 = 0;*/
   }
 }
 

@@ -28,81 +28,6 @@ void trip() {
 
 
 
-/*void update_vars() {
-  if ( update_vars_timer < millis() ) {
-    update_vars_timer = millis() + UPDATE_VARS_TIMER;
-
-    if ( engine_running ) {
-      engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
-    }
-  }
-}*/
-
-/*void print_status() {
-#ifdef PRINT_STATUS
-  if ( print_status_timer < millis() ) {
-    //TRACE_PRINTLN(F("#print_task_callback()"));
-    print_status_timer = millis() + PRINT_STATUS_TIMER;
-
-    Serial.write(27);       // ESC command
-    Serial.print("[2J");    // clear screen command
-    Serial.write(27);
-    Serial.print("[H");     // cursor to home command
-
-    Serial.println(F(""));
-    Serial.println(F("================"));
-
-    Serial.print(F("DATE: "));
-    sprintf(buf, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
-    Serial.println(buf);
-
-    Serial.print(F("GPS Fix: "));
-    Serial.println(gps_fixstatus, DEC);
-    Serial.print(F("Latitude: "));
-    Serial.println(gps_latitude, DEC);
-    Serial.print(F("Longitude: "));
-    Serial.println(gps_longitude, DEC);
-    Serial.print(F("Altitude: "));
-    Serial.println(gps_altitude, DEC);
-    Serial.print(F("Speed: "));
-    Serial.println(gps_speed, 2);
-    Serial.print(F("Course: "));
-    Serial.println(gps_course, DEC);
-    Serial.print(F("view Satallites: "));
-    Serial.println(gps_view_satellites, DEC);
-    Serial.print(F("used Satellites: "));
-    Serial.println(gps_used_satellites, DEC);
-    Serial.print(F("Distance: "));
-    Serial.println(gps_distance, DEC);
-
-    Serial.print(F("Port 1 (V): "));
-    Serial.println(a0_V, 2);
-    Serial.print(F("Port 2 (V): "));
-    Serial.println(a1_V, 2);
-    Serial.print(F("Port 3 (V): "));
-    Serial.println(a2_V, 2);
-    Serial.print(F("Port 4 (V): "));
-    Serial.println(a3_V, 2);
-    Serial.print(F("Port 5 (Hz): "));
-    Serial.println(a4_hz, 2);
-    Serial.print(F("Port 6 (Hz): "));
-    Serial.println(a5_hz, 2);
-
-    Serial.print(F("Speed (km/h): "));
-    Serial.println(speed, DEC);
-
-    for (int i = 0; i <= (sizeof(values) / sizeof(values[0])) - 1; i++) {
-      Serial.print(values[i].name);
-      Serial.print(F(": "));
-      Serial.println(*values[i].value);
-    }
-
-    Serial.println(F("================"));
-  }
-#endif
-}*/
-
-
 
 boolean parse_config_string(String inputString) {
 
@@ -276,6 +201,8 @@ void save_config() {
   write_virtual_eeprom();
 }
 
+
+
 /*
  * Read the virtual EEPROM
  */
@@ -425,7 +352,7 @@ void notify(byte type, String msg) {
     info_text = msg;
     display_notify();
     //MsgTimer = millis() + 10000;
-    //dimmer_active_timer = MsgTimer;
+    //display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
 
 
@@ -436,7 +363,7 @@ void notify(byte type, String msg) {
     info_text = msg;
     display_notify();
     //MsgTimer = millis() + 10000;
-    //dimmer_active_timer = MsgTimer;
+    //display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
 
   }
@@ -463,8 +390,8 @@ void notify(byte type, String msg) {
   }
   if (bitRead(type,7)) {
     //BOOTMSG
-    message(msg);
-    message(F("\n"));
+    message(NOTIFY, msg);
+    //message(F("\n"));
 
   }
   //#ifdef U8G2_DISPLAY
@@ -506,7 +433,7 @@ void button() {
         #ifdef U8G2_DISPLAY
         //display_loop();
         #endif
-        //online_intervall_timer = online_intervall_timer + 10000;
+        //online_intervalll_timer = online_intervalll_timer + 10000;
 
         //#endif
       }
@@ -570,15 +497,15 @@ void button() {
       else if ((button_1_low >= 1) && (button_1_high >= 1)) {
 
 
-        if ( ( !running ) && dimmer_active_timer < millis() ) {
+        if ( ( !running ) && display_active_timer < millis() ) {
           //button_1 = 0;
-          dimmer_active_timer = millis() + 30000;
-          display_active_timer = millis() + 30000;
+          //display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
+          display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
         }
         else {
           button_1 = 1;
-          dimmer_active_timer = millis() + 30000;
-          display_active_timer = millis() + 30000;
+          //display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
+          display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
         }
 
         button_1_high = 0;

@@ -11,8 +11,8 @@ void alarm_loop() {
         read_ports();
       }
       if ( blink_bg_led ) {
-        #ifdef U8G2_DISPLAY_BG_LED
-        analogWrite(U8G2_DISPLAY_BG_LED, 255);
+        #ifdef DISPLAY_BG_LED
+        analogWrite(DISPLAY_BG_LED, 255);
         #endif
       }
     }
@@ -23,8 +23,8 @@ void alarm_loop() {
         read_ports();
       }
       if ( blink_bg_led ) {
-        #ifdef U8G2_DISPLAY_BG_LED
-        analogWrite(U8G2_DISPLAY_BG_LED, 0);
+        #ifdef DISPLAY_BG_LED
+        analogWrite(DISPLAY_BG_LED, 0);
         #endif
       }
     }

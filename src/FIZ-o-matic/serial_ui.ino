@@ -17,10 +17,27 @@ void message(byte loglevel, String msg) {
     Serial.print(F("!ERROR: "));
     Serial.println(msg);
   }
+
   else {
     for (int i = 0; i <= 7; i++) {
       if ( (bitRead(loglevel, i)) && (bitRead(debug, i)) ) {
-        Serial.print(msg);
+        if ( loglevel == INFO_MSG ) {
+          Serial.print(F("[INFO]: "));
+        }
+        else if ( loglevel == GPS ) {
+          Serial.print(F("[GPS]: "));
+        }
+        else if ( loglevel == DEBUG_MSG ) {
+          Serial.print(F("[DEBUG]: "));
+        }
+        else {
+          Serial.print(F("[]: "));
+          //Serial.println(msg);
+
+        }
+
+        Serial.println(msg);
+
       }
     }
   }
@@ -113,6 +130,10 @@ void serial_parse() {
     Serial.println(F("#tinygsm_gps_init:"));
     tinygsm_gps_init();
   }
+  else if ( inputString.startsWith(F("tinygsm_set_baud")) ) {
+    Serial.println(F("#tinygsm_set_baud:"));
+    tinygsm_set_baud();
+  }
   else if ( inputString.startsWith(F("sdcard_init")) ) {
     Serial.println(F("#sdcard_init:"));
     sdcard_init();
@@ -126,7 +147,7 @@ void serial_parse() {
     Serial.println(F("#going online for 120s"));
     /*if (tinygsm_go_online()) {
       online = true;
-      online_intervall_timer = millis() + 120000;
+      online_intervalll_timer = millis() + 120000;
       Serial.println(F("#we are online"));
     }*/
     go_online = true;
@@ -134,7 +155,7 @@ void serial_parse() {
   else if ( inputString.startsWith(F("go_offline")) ) {
     /*if (tinygsm_go_offline()) {
       online = false;
-      online_intervall_timer = millis() + online_interval * 60000;
+      online_intervalll_timer = millis() + online_intervall * 60000;
       Serial.println(F("#we are offline"));
     }*/
     go_offline = true;
@@ -320,6 +341,8 @@ void serial_print_features(){
 }
 
 void serial_print_config(){
+  Serial.println(F("# fiz-o-matic configuration"));
+  Serial.println(F("#================"));
   Serial.println(F("#SIM APN"));
   Serial.print(F("sim_pin="));
   Serial.println(sim_pin);
@@ -345,7 +368,46 @@ void serial_print_config(){
     Serial.print(config[i].name);
     Serial.print(F("="));
     Serial.println(*config[i].config, DEC);
+    Serial.println();
   }
+
+  // print all features
+  Serial.println();
+  Serial.println(F("#================"));
+  Serial.println(F("#Features"));
+  Serial.println(F("#================"));
+  for (int i = 0; i <= (sizeof(features) / sizeof(features[0])) - 1; i++){
+    Serial.print(F("# "));
+    Serial.println(features[i].desc);
+    Serial.print(features[i].name);
+    Serial.print(F("="));
+    if (*features[i].feature) {
+      Serial.println(F("true"));
+    }
+    else {
+      Serial.println(F("false"));
+    }
+    Serial.println();
+  }
+
+  // print ports config
+  Serial.println(F("#================"));
+  Serial.println(F("#Port configuration"));
+  Serial.println(F("#================"));
+  for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
+    Serial.print(F("# "));
+    Serial.println(ports[i].desc);
+    Serial.print(ports[i].name);
+    Serial.print(F("=0x"));
+    if (*ports[i].port<16) {
+      Serial.print(F("0"));
+    }
+    Serial.println(*ports[i].port, HEX);
+    Serial.println();
+  }
+  Serial.println(F("#================#"));
+
+
 }
 
 

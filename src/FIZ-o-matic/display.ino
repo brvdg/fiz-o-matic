@@ -65,8 +65,20 @@ void display_init(void) {
 
 
 void display_loop() {
+  #if defined DSP_PWRSAVE
+    if ( display_pwrsave() ) {
+      delay(U8G2_DISPLAY_UPDATE_TIMER);
+      return;
+    }
+    yield();
+
+  #endif
+
   if ( !display_update_timer_lock ) {
     display_update_timer_lock = true;
+    //message(DEBUG_MSG, F("#...\n"));
+
+
     second = rtc.getSeconds();
     minute = rtc.getMinutes();
     hour = rtc.getHours();
@@ -99,8 +111,6 @@ void display_loop() {
 
           case MENU_optionen: menu_optionen(); break;
           case MENU_info: menu_info(); break;
-          /**
-          case MENU_optionen: menu_optionen(); break;
 
           case MENU_opt_config: menu_opt_config(); break;
           case MENU_opt_features: menu_opt_features(); break;
@@ -108,7 +118,7 @@ void display_loop() {
           case MENU_save_config: menu_save_config(); break;
 
           case MENU_debug_ports: menu_debug_ports(); break;
-          case MENU_debug_ports_2: menu_debug_ports_2(); break;**/
+          case MENU_debug_ports_2: menu_debug_ports_2(); break;
 
 
           case MENU_notify: {
@@ -145,12 +155,15 @@ void display_loop() {
       }
       button_1 = 0;
 
-      #if defined U8G2_DISPLAY
-      u8g2_update();
-      #endif
+      //#if defined U8G2_DISPLAY
+      //u8g2_update();
+      //#endif
       display_draw();
 
       SPI_lock = false;
+    }
+    else {
+      message(DEBUG_MSG, F("#spi bus locked...\n"));
     }
 
 
@@ -160,20 +173,23 @@ void display_loop() {
     //display_set_led();
   }
   else {
-    message(TRACE_MSG, F("#display update locked...\n"));
+    message(DEBUG_MSG, F("#display update locked...\n"));
   }
+  delay(U8G2_DISPLAY_UPDATE_TIMER);
+  yield();
 }
 
-void display_update(void) {
+/*void display_update(void) {
 
   //#if defined U8G2_DISPLAY
   //u8g2_update();
   //#else
-  display_loop();
+  //display_loop();
+  yield();
   //#endif
   //  SPI_lock = false;
   //}
-}
+}*/
 
 void display_notify() {
   //Serial.println("NOTIFY DISPLAY");
@@ -188,13 +204,13 @@ void display_notify() {
     NotifyActive = true;
     MsgTimer = millis() + 10000;
     //clear_screen();
-    display_update();
+    //display_update();
   }
   else {
     MsgTimer = millis() + 10000;
   }
 
-  display_update();
+  //display_update();
 }
 
 
@@ -228,6 +244,21 @@ void display_bootmsg(String msg) {
   message(INFO_MSG, msg);
   message(INFO_MSG, F("\n"));
 }**/
+
+
+#else
+
+void display_init() {
+  yield();
+}
+
+void display_notify() {
+  yield();
+}
+
+void display_loop() {
+  yield();
+}
 
 
 #endif

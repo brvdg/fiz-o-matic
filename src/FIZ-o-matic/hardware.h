@@ -34,9 +34,11 @@
 
 #if defined ST7735
 #define ENABLE_DISPLAY
-#define DISPLAY_CS 10
+#define DSP_PWRSAVE
+#define DISPLAY_CS 11
 #define DISPLAY_DC 12
-#define DISPLAY_RST 11
+//#define DISPLAY_RST 11
+#define DISPLAY_ON 10
 #endif
 
 #if defined TOUCHBUTTON
@@ -55,11 +57,18 @@ bool no_long_press = false;
    A2/A3 range 0-10V
    10 / 1024 = 0.009765
 */
-#define A0_MULTIPLICATOR 0.015234
+//#define A0_MULTIPLICATOR 0.015234
 
+#define TinyGSM
+#define TinyGSM_PWRKEY 1
 
 #endif //HW_TRINKET
 
+
+
+/*
+ * fiz-o-matic 0.8 with Adafruit Feather
+ */
 #if defined HW_FEATHER
 #define TinyGSM
 // enable SD card
@@ -105,7 +114,7 @@ bool no_long_press = false;
 #error "Only one display can be configured"
 #endif
 
-//#if defined (U8G2_DISPLAY_BG_LED) && defined (OLED)
-//#pragma message ( "U8G2_DISPLAY_BG_LED and OLDE can't used together" )
-//#error "U8G2_DISPLAY_BG_LED and OLED can't used together"
+//#if defined (DISPLAY_BG_LED) && defined (OLED)
+//#pragma message ( "DISPLAY_BG_LED and OLDE can't used together" )
+//#error "DISPLAY_BG_LED and OLED can't used together"
 //#endif

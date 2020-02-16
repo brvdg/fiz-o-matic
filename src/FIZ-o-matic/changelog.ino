@@ -1,5 +1,8 @@
 /*
- * 190920
+ * 200214a
+ * - Bug fixing
+ *
+ * 190920a
  * - add LCD ST7735
  * - updated u8g2 functions
  *

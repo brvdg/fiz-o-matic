@@ -27,7 +27,7 @@ int vw_temp [][2] PROGMEM = {  {1000, 20},
                         {32, 119},
                         {26, 125}};
 
-unsigned long IO_timer = 0;
+
 
 void IO_init() {
 
@@ -97,8 +97,8 @@ void IO_init() {
   #endif
 
 
-  #ifdef U8G2_DISPLAY_BG_LED
-  analogWrite(U8G2_DISPLAY_BG_LED, DIMMER_MIN);
+  #ifdef DISPLAY_BG_LED
+  analogWrite(DISPLAY_BG_LED, DIMMER_MIN);
   #endif
 
 
@@ -129,7 +129,7 @@ void IO_loop() {
 
     get_bord_voltage();
 
-    #ifdef U8G2_DISPLAY_BG_LED
+    #ifdef DISPLAY_BG_LED
     dimmer();
     #endif
 
@@ -226,7 +226,7 @@ void get_bord_voltage() {
   }*/
 }
 
-#ifdef U8G2_DISPLAY_BG_LED
+#ifdef DISPLAY_BG_LED
 void dimmer() {
   dimmer_V = get_port_value(dimmer_port);
 
@@ -238,8 +238,8 @@ void dimmer() {
     if (running) {
       dimmer_pct = 5;
     } else {
-      if ( dimmer_active_timer > millis() ) {
-        dimmer_pct = (dimmer_active * 100 ) / dimmer_max;
+      if ( display_active_timer > millis() ) {
+        dimmer_pct = (display_active * 100 ) / dimmer_max;
       }
       else {
         dimmer_pct = 0;
@@ -250,11 +250,11 @@ void dimmer() {
   //dimmer_val = ( dimmer_pct * DIMMER_MAX ) / 100;
   dimmer_val = ((dimmer_max - dimmer_min) * dimmer_pct) / 100;
   if (alarm_counter == 0) {
-    analogWrite(U8G2_DISPLAY_BG_LED, dimmer_val);
+    analogWrite(DISPLAY_BG_LED, dimmer_val);
   }
 
   #ifdef OFFLINE
-  analogWrite(U8G2_DISPLAY_BG_LED, 180);
+  analogWrite(DISPLAY_BG_LED, 180);
   #endif
 
 }
@@ -394,7 +394,7 @@ void read_ports() {
   //a2_V = analogRead(A2) * A2_MULTIPLICATOR;
   //a3_V = analogRead(A3) * A3_MULTIPLICATOR;
 
-  message(DEBUG_IO, F("#Ports: "));
+  //message(DEBUG_IO, F("#Ports: "));
 
   // for port A0 on address 0x01
   #ifdef A0_MULTIPLICATOR
@@ -409,8 +409,8 @@ void read_ports() {
 
   update_port_value( 0x01, analogRead(A0) * A0_MULTIPLICATOR);
 
-  message(DEBUG_IO, String(a0_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a0_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -428,8 +428,8 @@ void read_ports() {
   update_port_value( 0x02, analogRead(A1) * A1_MULTIPLICATOR);
   a1_V = analogRead(A1) * A1_MULTIPLICATOR;
 
-  message(DEBUG_IO, String(a1_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a1_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -446,8 +446,8 @@ void read_ports() {
 
   update_port_value( 0x03, analogRead(A2) * A2_MULTIPLICATOR);
 
-  message(DEBUG_IO, String(a2_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a2_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -464,8 +464,8 @@ void read_ports() {
 
   update_port_value( 0x04, analogRead(A3) * A3_MULTIPLICATOR);
 
-  message(DEBUG_IO, String(a3_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a3_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -482,8 +482,8 @@ void read_ports() {
 
   update_port_value( 0x05, analogRead(A4) * A4_MULTIPLICATOR);
 
-  message(DEBUG_IO, String(a4_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a4_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -500,8 +500,8 @@ void read_ports() {
 
   update_port_value( 0x06, analogRead(A5) * A5_MULTIPLICATOR);
 
-  message(DEBUG_IO, String(a5_V));
-  message(DEBUG_IO, F(" V, "));
+  //message(DEBUG_IO, String(a5_V));
+  //message(DEBUG_IO, F(" V, "));
 
   #endif
 
@@ -509,14 +509,14 @@ void read_ports() {
   // updatin print_port_values
   #ifdef A4_COUNTER
   update_port_value(0x05, a4_hz);
-  message(DEBUG_IO, String(a4_hz));
-  message(DEBUG_IO, F(" Hz, "));
+  //message(DEBUG_IO, String(a4_hz));
+  //message(DEBUG_IO, F(" Hz, "));
   #endif
 
   #ifdef A5_COUNTER
   update_port_value(0x06, a5_hz);
-  message(DEBUG_IO, String(a5_hz));
-  message(DEBUG_IO, F(" Hz\n"));
+  //message(DEBUG_IO, String(a5_hz));
+  //message(DEBUG_IO, F(" Hz\n"));
   #endif
 
 

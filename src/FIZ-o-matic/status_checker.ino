@@ -9,7 +9,7 @@
 bool fuel_notified = false;
 
 void status_checker() {
-  if ( status_checker_timer < millis() ) {
+  //if ( status_checker_timer < millis() ) {
 
     check_engine();
 
@@ -35,7 +35,8 @@ void status_checker() {
     check_auxiliary_heating();
 
     status_checker_timer = millis() + STATUS_CHECKER_TIMER;
-  }
+    delay(STATUS_CHECKER_TIMER);
+  //}
 }
 
 
@@ -56,7 +57,7 @@ void check_engine() {
       else {
         #ifdef U8G2_DISPLAY
         MainMenuPos = 2;
-        display_update();
+        //display_update();
         #endif //U8G2_DISPLAY
 
         if ( online ) {
@@ -82,7 +83,7 @@ void check_engine() {
 
       #ifdef U8G2_DISPLAY
       MainMenuPos = 1;
-      display_update();
+      //display_update();
       #endif //U8G2_DISPLAY
 
       engine_running = false;
@@ -98,8 +99,9 @@ void check_engine() {
         set_alarm(150, 150, 3, true);
       }
 
-      //online_intervall_timer = millis() + 10000;
+      //online_intervalll_timer = millis() + 10000;
       //tinygsm_go_online();
+      display_active_timer = millis() + 10000;
       go_online = true;
 
       // disable geo fenece
@@ -138,7 +140,7 @@ void check_alarm_system() {
 
       #ifdef U8G2_DISPLAY
       MainMenuPos = 1;
-      display_update();
+      //display_update();
       #endif
     }
   }
@@ -201,7 +203,7 @@ void check_online() {
 
   // online intervall
   if ( !stay_online && !engine_running && !alarm_system_triggered && !geo_fence_alarm) {
-    if ( online_intervall_timer < millis() ) {
+    if ( online_intervalll_timer < millis() ) {
       message(DEBUG_MSG, F("#check_online state\n"));
       //Serial.println("#");
       if (!online) {
@@ -211,7 +213,7 @@ void check_online() {
         /*message(INFO_MSG, F("#going online\n"));
         if (tinygsm_go_online()) {
           online = true;
-          online_intervall_timer = millis() + 10000;
+          online_intervalll_timer = millis() + 10000;
         }*/
       }
       else {
@@ -221,7 +223,7 @@ void check_online() {
         /*message(INFO_MSG, F("#going offline\n"));
         if (tinygsm_go_offline()) {
           online = false;
-          online_intervall_timer = millis() + online_interval * 60000;
+          online_intervalll_timer = millis() + online_intervall * 60000;
         }*/
       }
     }

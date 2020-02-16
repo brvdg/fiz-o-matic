@@ -12,8 +12,8 @@
  */
 //String bootmsg;
 String bootmsg1;
-String bootmsg2;
-String bootmsg3;
+//String bootmsg2;
+//String bootmsg3;
 //boolean boot=true;
 
 
@@ -23,7 +23,7 @@ char replybuffer[255];
 // a smal buffer
 char buf[36]; //
 
-bool serial_export = true;
+//bool serial_export = true;
 bool SPI_lock = false;
 bool I2C_lock = false;
 byte saved_config = 0;
@@ -34,7 +34,7 @@ byte saved_config = 0;
  * Debugging Variable
  */
 #ifdef DEBUG
-byte debug = 143;
+byte debug = 127;
 #else
 byte debug = 0;
 #endif
@@ -42,9 +42,12 @@ byte debug = 0;
 #define ERROR 0
 #define INFO_MSG 1
 #define DEBUG_MSG 2
-#define DEBUG_TINYGSM 4
+//#define DEBUG_TINYGSM 4
+#define NOTIFY 4
 #define DEBUG_SD 8
 #define DEBUG_IO 16
+#define GPS 32
+#define TINYGSM 64
 //#define DEBUG_ 32
 //#define TRACE_TINYGSM 64
 #define TRACE_MSG 128
@@ -109,8 +112,8 @@ float dimmer_V = 0;
 //byte mood_port = 2;
 byte dimmer_min = 0;
 byte dimmer_max = 10;
-byte dimmer_active = 5;
-unsigned long dimmer_active_timer = 0;
+byte display_active = 5;
+//unsigned long display_active_timer = 0;
 
 
 
@@ -177,7 +180,7 @@ PROGMEM boolean wdreset = false;
 byte aux_heating_port = 0;
 
 // OneWire
-bool onewire_enabled = false;
+bool onewire_enabled = true;
 bool onewire_available = false;
 
 //I2C
@@ -211,7 +214,7 @@ String blynk_key = BLYNK_KEY;
 String sms_keyword = SMS_Keyword;
 boolean online = false;
 boolean startmsg = true;
-byte online_interval = ONLINE_INTERVALL;
+byte online_intervall = ONLINE_INTERVALL;
 
 byte blynk_offline_counter = 0;
 boolean geo_fence_enabled = false;
@@ -221,7 +224,7 @@ boolean geo_fence_alarm_system = false;
 boolean stay_online = false;
 int geo_fence_distance = 100;
 boolean blynk_geo_fence_alarmed = false;
-unsigned long online_intervall_timer = 0;
+unsigned long online_intervalll_timer = 0;
 boolean blynk_alarm = false;
 
 boolean running = false;
@@ -270,7 +273,7 @@ float a3_tmp[IO_ARRAY];
 float a4_tmp[IO_ARRAY];
 float a5_tmp[IO_ARRAY];
 
-
+unsigned long IO_timer = 0;
 
 /*
  * Serial UI
@@ -317,6 +320,8 @@ byte lastfile_config = 0;
 /*
  * TINYGSM library
  */
+unsigned long tinygsm_timer = 0;
+unsigned long tinygsm_gps_timer = 0;
 
 boolean tinygsm_enabled = true;
 boolean blynk_enabled = true;
@@ -551,15 +556,15 @@ const struct_ports ports[] = {
   {"fuel_port", "Fuel Gauge Port", &fuel_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"water_temp_port", "Water Gauge Port", &water_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"rpm_port", "RPM Port", &rpm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"speedpulse_port", "GALA Port", &speedpulse_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"speed_source", "Speed Source", &speed_source, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"speedpulse_port", "GALA Port", &speedpulse_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"speed_source", "Speed Source", &speed_source, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"temp_out_port", "Temp. outsise", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"alarm_port", "Alarm", &alarm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true},
-  {"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
+  //{"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
  };
 
 struct struct_config {
@@ -573,19 +578,19 @@ struct struct_config {
 
 const struct_config config[] = {
   //{"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG},
-  {"online_interval", "Online Intervall (min)", &online_interval, 5, 240, 5},
-  {"lastfile_config", "Last Log File (x10)", &lastfile_config, 1, 99, 1},
+  {"online_intervall", "Online Intervall (min)", &online_intervall, 5, 240, 5},
+  //{"lastfile_config", "Last Log File (x10)", &lastfile_config, 1, 99, 1},
   {"dimmer_max", "Dimmer Max.", &dimmer_max, 5, 255, 0},
   {"dimmer_min", "Dimmer Min.", &dimmer_min, 5, 255, 0},
-  {"dimmer_active", "Dimmer Active", &dimmer_active, 10, 250, 0},
+  {"display_active", "Display Active", &display_active, 10, 250, 0},
 //  {"clock_view", "Clock and Temp.", &clock_view, 1, 1, 0},
   {"speed_offset", "Speed Offset", &speed_offset, 1, 25, 0},
   {"water_temp_warning", "Water Temp Warning", &water_temp_warning, 5, 130, 80},
-  {"oil_temp_warning", "Oil Temp Warning", &oil_temp_warning, 5, 150, 80},
-  {"oil_press_warning", "Oil Press. Warning (/10)", &oil_press_warning, 1, 10, 1},
+//  {"oil_temp_warning", "Oil Temp Warning", &oil_temp_warning, 5, 150, 80},
+//  {"oil_press_warning", "Oil Press. Warning (/10)", &oil_press_warning, 1, 10, 1},
 //  {"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, 1, 10, 1},
 //  {"aux_heating_mode", "Aux. Heating Mode", &aux_heating_mode, 1, 2, 0},
-  {"aux_heating_time", "Aux. Heating Time", &aux_heating_time, 5, 200, 0}
+//  {"aux_heating_time", "Aux. Heating Time", &aux_heating_time, 5, 200, 0}
 };
 
 struct struct_values {
@@ -604,8 +609,8 @@ const struct_values values[] {
   {"fuel_l", "Tank", &fuel_l, 0, "l", true, false, &fuel_port},
   {"water_temp", "Kuehlwasser", &water_temp, 0, "\xb0 C", true, false, &water_temp_port},
   {"rpm", "RPM", &rpm, 0, "U/min", true, false, &rpm_port},
-  {"oil_temp", "Oel Temp.", &oil_temp, 0, "\xb0 C", true, false, &oil_temp_port},
-  {"oil_pressure", "Oeldruck", &oil_pressure, 1, "bar", true, false, &oil_pressure_port},
+  //{"oil_temp", "Oel Temp.", &oil_temp, 0, "\xb0 C", true, false, &oil_temp_port},
+  //{"oil_pressure", "Oeldruck", &oil_pressure, 1, "bar", true, false, &oil_pressure_port},
   {"temp_out", "Temp. out", &temp_out, 1, "\xb0 C", false, false, &temp_out_port},
   {"hum_out", "Humidity out", &hum_out, 1, "\xb0 C", false, false, &hum_out_port},
   {"temp_in", "Temp. in", &temp_in, 1, "\xb0 C", false, false, &temp_in_port},
@@ -624,11 +629,11 @@ const struct_features features[] {
   {"tinygsm_enabled", "TinyGSM enabled", &tinygsm_enabled},
   //{"internet_enabled", "Internet enabled", &internet_enabled},
   {"blynk_enabled", "BLYNK enabled", &blynk_enabled},
-  {"sms_enabled", "SMS enabled", &sms_enabled},
+  //{"sms_enabled", "SMS enabled", &sms_enabled},
   {"gps_enabled", "GPS enabled", &gps_enabled},
   {"blynk_report", "Push reset/boot", &blynk_report},
   {"display_temp", "Display Temperature", &display_temp},
-  {"use_gps_speed", "use GPS Speed", &use_gps_speed,},
+  //{"use_gps_speed", "use GPS Speed", &use_gps_speed,},
   {"onewire_enabled", "enable 1Wire Bus", &onewire_enabled}
 };
 
@@ -650,7 +655,10 @@ FlashStorage(flash_char_config, struckt_char_config);
 
 FlashStorage(flash_watchdog_reset, boolean);
 
-
+/*
+ * Varible for millis rollover
+ */
+unsigned long prev_millis = 0;
 
 /*
  * converting a normal time into unix time

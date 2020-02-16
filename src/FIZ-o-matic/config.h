@@ -1,5 +1,5 @@
 /****************************************************
-   Busputer Configuration
+   fiz-o-matic Configuration
    for detailed informations see
    https://github.com/brvdg/busputer/wiki
  ****************************************************/
@@ -23,7 +23,7 @@
 
 // Port defination
 //#ifdef U8G2_DISPLAY
-//#define U8G2_DISPLAY_BG_LED 10 //turn this off if a OLED ist used
+//#define DISPLAY_BG_LED 10 //turn this off if a OLED ist used
 //#define U8G2_DISPLAY_CS 11
 //#define U8G2_DISPLAY_DC 12
 //#define U8G2_DISPLAY_RST 10
@@ -34,6 +34,9 @@
 #define DIMMER_MIN_mV 4000
 //#define DIMMER_MAX 150
 #define DIMMER_MIN 20
+
+// how long ist the display active in the standby after an action
+#define DISPLAY_ACTIVE_TIME 30000
 
 //#define CLOCK_VIEW 1 // 1 = clock and temperature / 0 = clock and date
 
@@ -88,7 +91,8 @@
 /*
     Temperature source
 */
-#define TEMP_OUT_PORT 0xF3
+//#define TEMP_OUT_PORT 0xF3
+#define TEMP_OUT_PORT 0x30
 #define HUM_OUT_PORT 0xF4
 #define TEMP_IN_PORT 0xF5
 #define HUM_IN_PORT 0xF6
@@ -111,14 +115,14 @@
 #define RPM_MULTIPL 2
 
 // Water Temp gauge
-//#define WATER_TEMP 0x03
-#define WATER_TEMP 0x80
+#define WATER_TEMP 0x03
+//#define WATER_TEMP 0x80
 #define SERIESRESISTOR 50 // Ohm of the original gauge
 #define WATER_TEMP_WARNING 110
 
 // Fuel gauge
-//#define FUEL_GAUGE_PORT 0x04
-#define FUEL_GAUGE_PORT 0x81
+#define FUEL_GAUGE_PORT 0x04
+//#define FUEL_GAUGE_PORT 0x81
 #define FUEL_GAUGERESISTOR 55
 #define FUEL_FULL 35
 #define FUEL_EMPTY 290
@@ -207,11 +211,14 @@
 #define STATUS_CHECKER_TIMER 200 // 200ms
 #define TAIL_TIMER 2000 // 2sec
 
-
-#define TinyGSM_GPS_TIMER 1000 // 1s
-#define TinyGSM_SMS_TIMER 5000 // 5s
+#define TinyGSM_TIMER 2000 // 1s
+#define TinyGSM_GPS_TIMER 1000 // 0,5s
+#define TinyGSM_SMS_TIMER 15000 // 15s
 #define TinyGSM_BATT_TIMER 30000 // 30s
 #define TinyGSM_BLYNK_TIMER 5000 // 5s
+#define TinyGSM_ONLINE_TIMER 30000
+
+
 //#define TinyGSM_GPS_STATUS_TIMER 3000 // 3s
 //#define BLYNK_CHECK_TIMER 600000 // 10min
 
