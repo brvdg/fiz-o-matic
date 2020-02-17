@@ -364,11 +364,14 @@ void get_fuel() {
   //TRACE_PRINT(F("#FUEL VOLTAGE: "));
   //TRACE_PRINTLN(fuel_V);
 
-  fuel_ohm = FUEL_GAUGERESISTOR * (fuel_V  / (10 - fuel_V ));
+  float ohm = FUEL_GAUGERESISTOR * (fuel_V  / (10 - fuel_V ));
+  fuel_ohm = ohm;
 
+  message(DEBUG_IO, String(fuel_ohm));
   float fuel_pct =(fuel_ohm - FUEL_FULL) * 100 / (FUEL_EMPTY - FUEL_FULL);
   fuel_pct = 100 - fuel_pct;
   fuel_l = fuel_pct * FUEL_L / 100;
+  //fuel_l = fuel_pct;
 
 
 }

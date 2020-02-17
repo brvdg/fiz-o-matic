@@ -123,9 +123,9 @@
 // Fuel gauge
 #define FUEL_GAUGE_PORT 0x04
 //#define FUEL_GAUGE_PORT 0x81
-#define FUEL_GAUGERESISTOR 55
-#define FUEL_FULL 35
-#define FUEL_EMPTY 290
+#define FUEL_GAUGERESISTOR 48
+#define FUEL_FULL 34
+#define FUEL_EMPTY 168
 #define FUEL_L 60
 #define FUEL_WARNING 15
 

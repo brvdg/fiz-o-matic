@@ -44,6 +44,7 @@ void check_engine() {
   if (bord_voltage > 4) {
     if (!engine_running) {
 
+      go_online = false;
 
       message(DEBUG_MSG, F("#--->Start Engine\n"));
       engine_running = true;
@@ -55,7 +56,7 @@ void check_engine() {
 
       }
       else {
-        #ifdef U8G2_DISPLAY
+        #ifdef ENABLE_DISPLAY
         MainMenuPos = 2;
         //display_update();
         #endif //U8G2_DISPLAY
@@ -81,10 +82,10 @@ void check_engine() {
 
       message(DEBUG_MSG, F("#--->Stop Engine\n"));
 
-      #ifdef U8G2_DISPLAY
+      #ifdef ENABLE_DISPLAY
       MainMenuPos = 1;
       //display_update();
-      #endif //U8G2_DISPLAY
+      #endif //ENABLE_DISPLAY
 
       engine_running = false;
       engine_running_total += engine_running_sec;
@@ -101,7 +102,7 @@ void check_engine() {
 
       //online_intervalll_timer = millis() + 10000;
       //tinygsm_go_online();
-      display_active_timer = millis() + 10000;
+      display_active_timer = millis() + 30000;
       go_online = true;
 
       // disable geo fenece
