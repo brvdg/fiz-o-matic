@@ -1,9 +1,14 @@
-/***************************************************
- *  This sketch is to check serveral status information and react with events.
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
  *
- *  Author: Brun
+ * This sketch is to check serveral status information and react with events.
  *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
+
+
 
 
 bool fuel_notified = false;
@@ -57,7 +62,7 @@ void check_engine() {
       }
       else {
         #ifdef ENABLE_DISPLAY
-        MainMenuPos = 2;
+        MainMenuPos = 1;
         //display_update();
         #endif //U8G2_DISPLAY
 
@@ -82,6 +87,8 @@ void check_engine() {
 
       message(DEBUG_MSG, F("#--->Stop Engine\n"));
 
+      NotifyActive = false;
+
       #ifdef ENABLE_DISPLAY
       MainMenuPos = 1;
       //display_update();
@@ -89,8 +96,10 @@ void check_engine() {
 
       engine_running = false;
       engine_running_total += engine_running_sec;
+      engine_running_sec = 0;
 
-      trip_time_last = trip_time;
+      //trip_time_last = trip_time;
+      //trip_time_all += trip_time;
 
       close_file();
 
@@ -103,7 +112,7 @@ void check_engine() {
       //online_intervalll_timer = millis() + 10000;
       //tinygsm_go_online();
       display_active_timer = millis() + 30000;
-      go_online = true;
+      //go_online = true;
 
       // disable geo fenece
       if ( geo_fence_distance != 0 ) {
@@ -203,29 +212,16 @@ void check_online() {
   //message(DEBUG_MSG, F("#check_online\n"));
 
   // online intervall
-  if ( !stay_online && !engine_running && !alarm_system_triggered && !geo_fence_alarm) {
+  
+
+  if ( !stay_online && !engine_running && !alarm_system_triggered && !geo_fence_alarm && ( display_active_timer < millis() ) ) {
     if ( online_intervalll_timer < millis() ) {
       message(DEBUG_MSG, F("#check_online state\n"));
-      //Serial.println("#");
       if (!online) {
-        //tinygsm_go_online();
-        message(DEBUG_MSG, F("#we should go online\n"));
         go_online = true;
-        /*message(INFO_MSG, F("#going online\n"));
-        if (tinygsm_go_online()) {
-          online = true;
-          online_intervalll_timer = millis() + 10000;
-        }*/
       }
       else {
-        message(DEBUG_MSG, F("#we should go online\n"));
-        //tinygsm_go_offline();
         go_offline = true;
-        /*message(INFO_MSG, F("#going offline\n"));
-        if (tinygsm_go_offline()) {
-          online = false;
-          online_intervalll_timer = millis() + online_intervall * 60000;
-        }*/
       }
     }
   }
@@ -234,7 +230,7 @@ void check_online() {
       message(TRACE_MSG, F("#stay online (stay_online=true)\n"));
     }
     else if ( engine_running ) {
-      message(TRACE_MSG, F("#stay online (engine_running=true)\n"));
+      message(TRACE_MSG, F("#stay offline (engine_running=true)\n"));
     }
     else if ( alarm_system_triggered ) {
       message(TRACE_MSG, F("#stay online (alarm_system_triggered=true)\n"));

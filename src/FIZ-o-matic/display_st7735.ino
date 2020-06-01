@@ -244,6 +244,12 @@ void st7735_init(void) {
   tft.print(F("Booting..."));
 }
 
+void display_logo() {
+
+  tft.drawXBitmap(LOGO_Xpos, LOGO_Ypos, logo, LOGO_width, LOGO_height, FONTCOLOR);
+
+}
+
 bool display_pwrsave() {
   #if defined DSP_PWRSAVE
     if ( ( display_active_timer > millis() ) || ( engine_running ) ) {

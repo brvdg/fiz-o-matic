@@ -1,28 +1,32 @@
-/***************************************************
-    This scetch is used to hold all functions to keep the main sketch clean
-
-    Author: Brun
-
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
+ * This scetch is used to hold all functions to keep the main sketch clean
+ *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
 
+
+
+
 void trip() {
-
-  if ( trip_timer < millis() ) {
-    trip_timer = millis() + 1000;
-    //TRACE_PRINTLN(F("#run trip calculation "));
-
+  if ( timer_check(&trip_timer, 10000) ) {
     if ( engine_running ) {
       trip_time = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
-      message(DEBUG_MSG, F("Trip - time: "));
-      message(DEBUG_MSG, String(trip_time));
       trip_distance = gps_distance;
-      message(DEBUG_MSG, F("sec, distance: "));
-      message(DEBUG_MSG, String(trip_distance));
-      message(DEBUG_MSG, F("m \n"));
+
+      String msg = F("Trip - time: ");
+      msg += String(trip_time, DEC);
+      msg += F("sec, distance: ");
+      msg += String(trip_distance, DEC);
+      msg += F("m");
+      message(DEBUG_MSG, msg );
     }
-    else {
+    /*else {
       trip_time = trip_time_last;
-    }
+    }*/
   }
 }
 
@@ -37,33 +41,26 @@ boolean parse_config_string(String inputString) {
   inputString.trim();
   message(DEBUG_MSG, F("#"));
   message(DEBUG_MSG, inputString);
-  //message(DEBUG_MSG, F("\n"));
 
   if ( inputString.startsWith("#") ) {
-    //SD_DEBUG_PRINTLN(F("found comment"));
     message(TRACE_MSG, F("found comment\n"));
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("sim_pin=") ) {
     sim_pin=getValue( inputString, '=', 1 );
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn=") ) {
     apn=getValue( inputString, '=', 1 );
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn_user=") ) {
     apn_user=getValue( inputString, '=', 1 );
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("apn_pass=") ) {
     apn_pass=getValue( inputString, '=', 1 );
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else if ( inputString.startsWith("blynk_key=") ) {
     blynk_key=getValue( inputString, '=', 1 );
@@ -73,7 +70,6 @@ boolean parse_config_string(String inputString) {
   else if ( inputString.startsWith("sms_keyword=") ) {
     sms_keyword=getValue( inputString, '=', 1 );
     found = true;
-    //message(INFO_MSG, (F("OK\n")));
   }
   else {
     for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
@@ -81,7 +77,6 @@ boolean parse_config_string(String inputString) {
         tmp = getValue( inputString, '=', 1 );
         *config[i].config = tmp.toInt();
         found = true;
-        //message(INFO_MSG, (F("OK\n")));
       }
     }
 
@@ -102,11 +97,9 @@ boolean parse_config_string(String inputString) {
         tmp = getValue( inputString, '=', 1 );
         if ( tmp.startsWith(F("true")) ) {
           *features[i].feature = true;
-          //message(INFO_MSG, (F("OK\n")));
         }
         else if ( tmp.startsWith(F("false")) ) {
           *features[i].feature = false;
-          //message(INFO_MSG, (F("OK\n")));
         }
         else {
           message(F("#ERROR: use only 'true' or 'false'"));
@@ -121,7 +114,6 @@ boolean parse_config_string(String inputString) {
     return true;
   }
   else {
-    //Serial.println(F("#error unknown command"));
     return false;
   }
 
@@ -131,7 +123,6 @@ int StrToInt(String str)
 {
 
   if ( str.indexOf(F("x")) > 0 ) {
-    //Serial.println("it's HEX");
     char tmp[5];
     str.toCharArray(tmp, 5);
     return (int) strtol(tmp, 0, 16);
@@ -145,7 +136,6 @@ int StrToInt(String str)
 
 void check_plausibility() {
 
-  // check BLYNK config if tinygsm is enabled
   if ( tinygsm_enabled ) {
     if ( blynk_key.equals(BLYNK_KEY) ) {
       message( ERROR, F("blynk_key is not set\n"));
@@ -196,9 +186,28 @@ float get_distance(float latitude1, float longitude1, float latitude2, float lon
 }
 
 
+void read_config() {
+  message(STORAGE, F("read configuration"));
+
+  #ifdef SPIFLASH
+  spiflash_open_config();
+  #elif SDCARD
+  sdcard_open_config();
+  #else
+  read_virtual_eeprom();
+  #endif
+
+}
+
 void save_config() {
+  message(STORAGE, F("save configuration"));
+  #ifdef SPIFLASH
+  spiflash_save_config();
+  #elif SDCARD
   sdcard_save_config();
+  #else
   write_virtual_eeprom();
+  #endif
 }
 
 
@@ -213,21 +222,14 @@ void read_virtual_eeprom() {
   if (EEPROM.isValid()) {
     message(INFO_MSG, F("#read EEPROM!\n"));
 
-    //Serial.print("->");
     message(DEBUG_MSG, F("#config ->"));
     for (int i=0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++) {
-      //Serial.print(" ");
-      //Serial.print(EEPROM.read(i));
       message(DEBUG_MSG, F(" "));
       message(DEBUG_MSG, String(EEPROM.read(addr), DEC));
 
       *config[i].config = EEPROM.read(addr);
       addr++;
     }
-    //Serial.println();
-    /*for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
-      *config[i].config = EEPROM.read(i);
-    }*/
 
     message (DEBUG_MSG, F("\n#ports ->"));
     for (int i=0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++) {
@@ -280,7 +282,6 @@ void read_virtual_eeprom() {
     message (DEBUG_MSG, F("\n"));
 
   } else {
-    //display_bootmsg(F("config flash is empty"));
     notify(BOOTMSG, F("config flash is empty"));
   }
 }
@@ -333,9 +334,6 @@ void write_virtual_eeprom() {
   if ( EEPROM.isValid() ) {
     message(INFO_MSG, F("#EEPROM is valid\n"));
   }
-  //message(INFO_MSG, F("#isValid() returns "));
-  //message(INFO_MSG, String(EEPROM.isValid()));
-  //message(INFO_MSG, F("\n"));
 
   read_virtual_eeprom();
 
@@ -351,8 +349,8 @@ void notify(byte type, String msg) {
     info_type = 1;
     info_text = msg;
     display_notify();
-    //MsgTimer = millis() + 10000;
-    //display_active_timer = MsgTimer;
+    MsgTimer = millis() + 10000;
+    display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
 
 
@@ -362,8 +360,8 @@ void notify(byte type, String msg) {
     info_type = 2;
     info_text = msg;
     display_notify();
-    //MsgTimer = millis() + 10000;
-    //display_active_timer = MsgTimer;
+    MsgTimer = millis() + 10000;
+    display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
 
   }
@@ -411,137 +409,6 @@ void notify(byte type, String msg) {
    4 = long pressed repeat
    5 = double press?
 */
-
-void button() {
-
-  if ( button_timer < millis() ) {
-    button_timer = millis() + BUTTON_TIMER;
-    if ( !button_timer_lock ) {
-      button_timer_lock = true;
-
-      if (digitalRead(BUTTON_PIN_1) == BUTTON_PRESSED) {
-        #ifdef FeatherLED8
-        digitalWrite(FeatherLED8, HIGH);
-        #endif FeatherLED8
-
-        button_1_low++;
-        button_1_high = 0;
-        //#ifdef DEBUG
-        //TRACE_PRINTLN(F("#Button pressed "));
-        //TRACE_PRINTLN(button_1_low, DEC);
-        //TRACE_PRINTLN(button_1_high, DEC);
-        #ifdef U8G2_DISPLAY
-        //display_loop();
-        #endif
-        //online_intervalll_timer = online_intervalll_timer + 10000;
-
-        //#endif
-      }
-      else {
-        //digitalWrite(8, LOW);
-        button_1_high++;
-      }
-      // long press
-      if ((button_1_low == 10) && (button_1_high == 0)) {
-        if (no_long_press) {
-          button_1 = 1;
-        }
-        else {
-          button_1 = 2;
-        }
-        button_1_high = 0;
-        //#ifdef DEBUG
-        //TRACE_PRINTLN(F("#long press"));
-        //#endif
-      }
-      // long press released
-      else if ((button_1_low >= 10) && (button_1_high >= 1)) {
-        if (no_long_press) {
-          button_1 = 1;
-        }
-        else {
-          button_1 = 3;
-        }
-        //button_1 = 3;
-        button_1_high = 0;
-        button_1_low = 0;
-        //#ifdef DEBUG
-        //TRACE_PRINTLN(F("#long press rleased"));
-        //#endif
-      }
-      // long press repeat
-      else if ((button_1_low >= 15) && (button_1_high == 0)) {
-        button_1 = 4;
-        button_1_high = 0;
-        //#ifdef DEBUG
-        //TRACE_PRINTLN(F("#long press repeat"));
-        //#endif
-      }
-
-
-      /*else if ((button_1_low >= 1) && (button_1_high == 1)) {
-        if ( button_1_double == 1 ) {
-          button_1 = 6;
-          button_1_high=0;
-          button_1_low=0;
-          button_1_double = 0;
-          Serial.println(F("double press"));
-
-        }
-        else {
-          button_1 = 5;
-          button_1_double = 1;
-          Serial.println(F("double press??"));
-        }
-        }*/
-      else if ((button_1_low >= 1) && (button_1_high >= 1)) {
-
-
-        if ( ( !running ) && display_active_timer < millis() ) {
-          //button_1 = 0;
-          //display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
-          display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
-        }
-        else {
-          button_1 = 1;
-          //display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
-          display_active_timer = millis() + DISPLAY_ACTIVE_TIME;
-        }
-
-        button_1_high = 0;
-        button_1_low = 0;
-        button_1_double = 0;
-        //Serial.println(F("#short press"));
-      }
-
-      button_timer_lock = false;
-    }
-    //else {
-    //  Serial.println(F("#button locked..."));
-    //}
-  }
-}
-
-bool next() {
-  if ( button_1 == 1 ) {
-    button_1 = 0;
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-bool enter() {
-  if ( button_1 == 2 ) {
-    button_1 = 0;
-    return true;
-  }
-  else {
-    return false;
-  }
-
-}
 
 
 /*

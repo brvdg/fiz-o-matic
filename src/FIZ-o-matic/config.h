@@ -1,4 +1,14 @@
 /****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
+ * fiz-o-matic configuration
+ *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
+ ****************************************************/
+
+ /****************************************************
    fiz-o-matic Configuration
    for detailed informations see
    https://github.com/brvdg/busputer/wiki
@@ -52,9 +62,11 @@
 #define APN "internet.t-mobile"
 #define APN_USER "t-mobile"
 #define APN_PASS "tm"
-#define SMS_Keyword "keyword"
+#define SMS_Keyword "fiz"
 
-#define BLYNK_KEY "0123456789abcdefghijkl"
+#ifndef BLYNK_KEY
+#define BLYNK_KEY "0123456789abcd"
+#endif
 
 #define MYNUMBER "+4915141284285"
 #define BLYNK_DEVICE_NAME "MyCar"
@@ -111,7 +123,7 @@
 
 
 // RPM gauge
-#define RPM_PORT 5
+#define RPM_PORT 0x05
 #define RPM_MULTIPL 2
 
 // Water Temp gauge
@@ -125,14 +137,14 @@
 //#define FUEL_GAUGE_PORT 0x81
 #define FUEL_GAUGERESISTOR 48
 #define FUEL_FULL 34
-#define FUEL_EMPTY 168
+#define FUEL_EMPTY 175
 #define FUEL_L 60
 #define FUEL_WARNING 15
 
 
 // Alarm output
 #define ALARM_OUT
-#define ALARM_PORT 13
+#define ALARM_PORT 0x08
 
 
 // bord voltage
@@ -212,12 +224,13 @@
 #define TAIL_TIMER 2000 // 2sec
 
 #define TinyGSM_TIMER 2000 // 1s
-#define TinyGSM_GPS_TIMER 1000 // 0,5s
+
 #define TinyGSM_SMS_TIMER 15000 // 15s
 #define TinyGSM_BATT_TIMER 30000 // 30s
 #define TinyGSM_BLYNK_TIMER 5000 // 5s
 #define TinyGSM_ONLINE_TIMER 30000
 
+#define GPS_TIMER 1000 // 0,5s
 
 //#define TinyGSM_GPS_STATUS_TIMER 3000 // 3s
 //#define BLYNK_CHECK_TIMER 600000 // 10min
@@ -226,7 +239,7 @@
 
 
 // Number of values for an average
-#define IO_ARRAY 5
+#define IO_ARRAY 100
 
 
 

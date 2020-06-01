@@ -1,10 +1,15 @@
-/***************************************************
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
  *  This sketch is for OneWire functions.
  *  http://www.hobbytronics.co.uk/ds18b20-arduino
  *
- *  Author: Brun
- *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
+
+
 
 #ifdef ONEWIRE
 

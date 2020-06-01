@@ -1,8 +1,13 @@
 /****************************************************
-   FIZ-o-Matic Hardware configuration
-   for detailed informations see
-   https://github.com/brvdg/busputer/wiki
-****************************************************/
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
+ * FIZ-o-Matic Hardware configuration
+ *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
+ ****************************************************/
+
 
 
 
@@ -49,15 +54,12 @@ bool no_long_press = true;
 bool no_long_press = false;
 #endif
 
-#if defined HW_TRINKET
+
+
 /*
-   analog input multiplicator
-   A0/A1 range 0-15.6V
-   15.6 / 1024 = 0.015234
-   A2/A3 range 0-10V
-   10 / 1024 = 0.009765
-*/
-//#define A0_MULTIPLICATOR 0.015234
+ * fiz-o-matic 0.8 with Adafruit Trinket
+ */
+#if defined HW_TRINKET
 
 #define TinyGSM
 #define TinyGSM_PWRKEY 1
@@ -80,7 +82,6 @@ bool no_long_press = false;
 #define FeatherLED8 8
 
 #if defined TinyGSM
-// TinyGSM Reset
 #define TinyGSM_PWRKEY 5
 #endif
 
@@ -106,6 +107,31 @@ bool no_long_press = false;
 
 #endif //HW_FEATHER
 
+#if defined HW_FEATHER_EXPRESS
+#define TinyGSM
+#define TinyGSM_PWRKEY 5
+//#define TinyGPS
+
+#define SPIFLASH
+/*
+   analog input multiplicator
+   A0/A1 range 0-15.6V
+   15.6 / 1024 = 0.015234
+   A2/A3 range 0-10V
+   10 / 1024 = 0.009765
+*/
+#define A0_MULTIPLICATOR 0.015234
+#define A1_MULTIPLICATOR 0.015234
+#define A2_MULTIPLICATOR 0.009765
+#define A3_MULTIPLICATOR 0.009765
+#define A4_COUNTER
+#define A5_MULTIPLICATOR 0.015234
+
+
+#define GPIO6
+#define GPIO13
+
+#endif //HW_FEATHER_EXPRESS
 
 
 

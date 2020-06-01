@@ -1,10 +1,14 @@
-/***************************************************
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
  *  This code is based on the SdFat library from Bill Greiman.
  *  GIT: https://github.com/greiman/SdFat
  *
- *  Author: Brun
- *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
+
 
 #ifdef SDCARD
 
@@ -16,7 +20,7 @@ SdFile logfile;
 
 
 void sdcard_init() {
-  message(DEBUG_SD, F("#->enable_sdcard\n"));
+  message(STORAGE, F("#->enable_sdcard\n"));
   if ( !SPI_lock ) {
     SPI_lock = true;
     for (int i = 0; i<5; i++) {
@@ -61,7 +65,7 @@ void sdcard_init() {
 }
 
 void sdcard_open_config() {
-  message(DEBUG_SD, F("#->open_config\n"));
+  message(STORAGE, F("#->open_config\n"));
   String tmp;
   int n;
 
@@ -92,7 +96,7 @@ void sdcard_open_config() {
 void log_to_sdcard() {
   if ( log_timer < millis() ) {
     log_timer = millis() + LOG_TIMER;
-    message(DEBUG_SD, F("#->log_to_sdcard\n"));
+    message(STORAGE, F("#->log_to_sdcard\n"));
     if ( !SDmount ) return;
     if ( !SPI_lock ) {
       SPI_lock = true;
@@ -100,7 +104,7 @@ void log_to_sdcard() {
 
 
       if (filename[0] == '-') {
-        message(DEBUG_SD,F("#no file opened"));
+        message(STORAGE,F("#no file opened"));
       }
       else {
         if ( gps_fixstatus ) {
@@ -176,7 +180,7 @@ void log_to_sdcard() {
       SPI_lock = false;
     }
     else {
-      message(DEBUG_SD, F("#SPI Bus locked for log_to_sdcard\n"));
+      message(STORAGE, F("#SPI Bus locked for log_to_sdcard\n"));
     }
 
     digitalWrite(8, LOW);
@@ -240,7 +244,7 @@ void dump_file(int filenumber) {
 
 
 void get_last_log(void) {
-  message(DEBUG_SD, F("#->get_last_log\n"));
+  message(STORAGE, F("#->get_last_log\n"));
   notify(BOOTMSG, F("Check Files"));
 
   if ( !SDmount ) return;
@@ -264,30 +268,30 @@ void get_last_log(void) {
       filename_tmp[5] = '0' + i / 100;
       filename_tmp[6] = '0' + i / 10 - (i / 100 * 10);
       filename_tmp[7] = '0' + i % 10;
-      message(DEBUG_SD, F("#Check file: "));
-      message(DEBUG_SD, filename_tmp);
+      message(STORAGE, F("#Check file: "));
+      message(STORAGE, filename_tmp);
       if (! SD.exists(filename_tmp)) {
-        message(DEBUG_SD, F(" doesn't exist\n"));
+        message(STORAGE, F(" doesn't exist\n"));
         nofound_cnt++;
         if ( nofound_cnt >= 50 ) break;
       }
       else {
-        message(DEBUG_SD, F(" exist\n"));
+        message(STORAGE, F(" exist\n"));
         strcpy(filename, filename_tmp);
         lastfile = i;
         lastfile_config = i / 10;
       }
     }
 
-    message(DEBUG_SD, F("#Last Log:"));
-    message(DEBUG_SD, filename);
-    message(DEBUG_SD, F("\n"));
+    message(STORAGE, F("#Last Log:"));
+    message(STORAGE, filename);
+    message(STORAGE, F("\n"));
     File dataFile = SD.open(filename);
     unsigned long filesize = dataFile.size();
 
-    message(DEBUG_SD, F("#FileSize: "));
-    message(DEBUG_SD, String(filesize, DEC));
-    message(DEBUG_SD, F("\n"));
+    message(STORAGE, F("#FileSize: "));
+    message(STORAGE, String(filesize, DEC));
+    message(STORAGE, F("\n"));
 
     filesize -= 500;
     dataFile.seek(filesize);
@@ -309,27 +313,27 @@ void get_last_log(void) {
               switch (field) {
                 case 2:
                   gps_latitude = atof(replybuffer);
-                  message(DEBUG_SD, F("#gps_latitude: "));
-                  message(DEBUG_SD, String(gps_latitude));
-                  message(DEBUG_SD, F("\n"));
+                  message(STORAGE, F("#gps_latitude: "));
+                  message(STORAGE, String(gps_latitude));
+                  message(STORAGE, F("\n"));
                   break;
                 case 3:
                   gps_longitude = atof(replybuffer);
-                  message(DEBUG_SD, F("#gps_longitude: "));
-                  message(DEBUG_SD, String(gps_longitude));
-                  message(DEBUG_SD, F("\n"));
+                  message(STORAGE, F("#gps_longitude: "));
+                  message(STORAGE, String(gps_longitude));
+                  message(STORAGE, F("\n"));
                   break;
                 case 9:
                   gps_distance = atoi(replybuffer);
-                  message(DEBUG_SD, F("#gps_distance: "));
-                  message(DEBUG_SD, String(gps_distance));
-                  message(DEBUG_SD, F("\n"));
+                  message(STORAGE, F("#gps_distance: "));
+                  message(STORAGE, String(gps_distance));
+                  message(STORAGE, F("\n"));
                   break;
                 case 11:
                   engine_running_total = atoi(replybuffer);
-                  message(DEBUG_SD, F("#engine_running_total: "));
-                  message(DEBUG_SD, String(engine_running_total));
-                  message(DEBUG_SD, F("\n"));
+                  message(STORAGE, F("#engine_running_total: "));
+                  message(STORAGE, String(engine_running_total));
+                  message(STORAGE, F("\n"));
               }
 
               //clear the buffer
@@ -348,7 +352,7 @@ void get_last_log(void) {
           }
           else if ( ch == '%' ) {
             fileclosed = true;
-            //message(DEBUG_SD, "#last file is closed\n");
+            //message(STORAGE, "#last file is closed\n");
           }
           else {
             replybuffer[i] = ch;
@@ -360,7 +364,7 @@ void get_last_log(void) {
       dataFile.close();
 
       if ( !fileclosed ) {
-        message(DEBUG_SD, F("#last file is not closed...\n"));
+        message(STORAGE, F("#last file is not closed...\n"));
         if (!dataFile.open(filename, O_RDWR | O_CREAT | O_AT_END)) {
           SD.errorHalt(F("opening test.txt for write failed"));
           //delay(2000);
@@ -376,7 +380,7 @@ void get_last_log(void) {
         dataFile.close();
       }
       else {
-        message(DEBUG_SD, "#last file is closed\n");
+        message(STORAGE, "#last file is closed\n");
       }
     }
     SPI_lock = false;
@@ -387,7 +391,7 @@ void get_last_log(void) {
 }
 
 void open_file() {
-  message(DEBUG_SD, F("#->open_file\n"));
+  message(STORAGE, F("#->open_file\n"));
 
   if ( !SDmount ) return;
 
@@ -406,9 +410,9 @@ void open_file() {
       filename[5] = '0' + i / 100;
       filename[6] = '0' + i / 10 - (i / 100 * 10);
       filename[7] = '0' + i % 10;
-      message(DEBUG_SD, F("#Check file: "));
-      message(DEBUG_SD, filename);
-      message(DEBUG_SD, F("\n"));
+      message(STORAGE, F("#Check file: "));
+      message(STORAGE, filename);
+      message(STORAGE, F("\n"));
       if (! SD.exists(filename)) {
         lastfile = i;
         lastfile_config = i / 10;
@@ -417,9 +421,9 @@ void open_file() {
     }
 
     if ( !logfile.open(filename, O_RDWR | O_CREAT | O_AT_END) ) {
-      message(DEBUG_SD, F("#Couldnt create "));
-      message(DEBUG_SD, filename);
-      message(DEBUG_SD, F("\n"));
+      message(STORAGE, F("#Couldnt create "));
+      message(STORAGE, filename);
+      message(STORAGE, F("\n"));
     }
     message(INFO_MSG, "#Writing to ");
     message(INFO_MSG, filename);
@@ -438,7 +442,7 @@ void open_file() {
 }
 
 void close_file() {
-  message(DEBUG_SD, F("#->close_file\n"));
+  message(STORAGE, F("#->close_file\n"));
 
   if ( !SDmount ) return;
 
@@ -462,7 +466,7 @@ void close_file() {
 
 
 void sdcard_save_config() {
-  message(DEBUG_SD, F("#->save_config\n"));
+  message(STORAGE, F("#->save_config\n"));
   message(INFO_MSG, F("#Writing config to SD\n"));
 
   if ( !SDmount ) return;
@@ -471,17 +475,17 @@ void sdcard_save_config() {
     SPI_lock = true;
 
     if ( !SD.remove("config.txt")) {
-      message(DEBUG_SD, F("#can't remove config.txt\n"));
+      message(STORAGE, F("#can't remove config.txt\n"));
     }
 
     SdFile::dateTimeCallback(dateTime);
 
     if ( !logfile.open("config.txt", O_RDWR | O_CREAT | O_AT_END) ) {
-      message(DEBUG_SD, F("#Couldnt create config.txt\n"));
+      message(STORAGE, F("#Couldnt create config.txt\n"));
     }
     else {
 
-      message(DEBUG_SD, F("#Writing config.txt\n"));
+      message(STORAGE, F("#Writing config.txt\n"));
 
       logfile.println(F("#This is the configuration file"));
 
@@ -558,7 +562,7 @@ void sdcard_save_config() {
     }
 
     SPI_lock = false;
-    message(DEBUG_SD, F("#OK\n"));
+    message(STORAGE, F("#OK\n"));
     message(INFO_MSG, F("#Done!\n"));
   }
 }

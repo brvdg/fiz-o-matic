@@ -1,8 +1,11 @@
-/***************************************************
- *  This sketch handle the serial UI commands
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
  *
- *  Author: Brun
+ * This sketch handle the serial UI commands
  *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
 
 
@@ -18,28 +21,32 @@ void message(byte loglevel, String msg) {
     Serial.println(msg);
   }
 
-  else {
-    for (int i = 0; i <= 7; i++) {
-      if ( (bitRead(loglevel, i)) && (bitRead(debug, i)) ) {
-        if ( loglevel == INFO_MSG ) {
-          Serial.print(F("[INFO]: "));
-        }
-        else if ( loglevel == GPS ) {
-          Serial.print(F("[GPS]: "));
-        }
-        else if ( loglevel == DEBUG_MSG ) {
-          Serial.print(F("[DEBUG]: "));
-        }
-        else {
-          Serial.print(F("[]: "));
-          //Serial.println(msg);
-
-        }
-
-        Serial.println(msg);
-
-      }
+  else if ( debug ){
+    if ( loglevel == INFO_MSG ) {
+      Serial.print(F("[INFO]: "));
     }
+    else if ( loglevel == GPS ) {
+      Serial.print(F("[GPS]: "));
+    }
+    else if ( loglevel == DEBUG_MSG ) {
+      Serial.print(F("[DEBUG]: "));
+    }
+    else if ( loglevel == TINYGSM ) {
+      Serial.print(F("[TINYGSM]: "));
+    }
+    else if ( loglevel == STORAGE ) {
+      Serial.print(F("[STORAGE]: "));
+    }
+    else if ( loglevel == NOTIFY ) {
+      Serial.print(F("[NOTIFY]: "));
+    }
+    else {
+      Serial.print(F("[ELSE]: "));
+      //Serial.println(msg);
+
+    }
+
+    Serial.println(msg);
   }
 }
 
@@ -53,12 +60,12 @@ void serial_parse() {
   if ( inputString.startsWith(F("debug=")) ) {
     tmp = getValue( inputString, '=', 1 );
     if ( tmp.toInt() == 0 ) {
-      debug = 0;
+      debug = false;
     }
     else {
-      bitSet(debug, tmp.toInt()-1);
+      debug = true;
     }
-    Serial.print(F("#Debug Level is: "));
+    Serial.print(F("#Debug is: "));
     Serial.println(debug, DEC);
   }
   else if ( inputString.startsWith(F("print")) ) {
@@ -201,7 +208,7 @@ void serial_parse() {
     Serial.println(F("#     =1   ->  INFO"));
     Serial.println(F("#     =2   ->  DEBUG"));
     Serial.println(F("#     =3   ->  DEBUG_TINYGSM"));
-    Serial.println(F("#     =4   ->  DEBUG_SD"));
+    Serial.println(F("#     =4   ->  STORAGE"));
     Serial.println(F("#     =5   ->  DEBUG_IO"));
     Serial.println(F("#     =6   ->  nothing"));
     Serial.println(F("#     =7   ->  TRACE_TINYGSM"));

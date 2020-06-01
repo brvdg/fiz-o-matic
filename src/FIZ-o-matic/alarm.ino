@@ -36,7 +36,7 @@ void alarm_loop() {
   }
 }
 
-void make_alarm() {
+/*void make_alarm() {
 
 
   if (alarm = 1 ) {
@@ -57,17 +57,14 @@ void make_alarm() {
       alarm_off_timer = alarm_on_timer + alarm_pause;
     }
   }
-}
+}*/
 
 void set_alarm(int on, int pause, int count, boolean blink) {
   alarm_counter = count;
   alarm_on = on;
   alarm_pause = pause;
-
   blink_bg_led = blink;
-
   alarm_counter++;
-
 }
 
 #endif // ALARM_OUT

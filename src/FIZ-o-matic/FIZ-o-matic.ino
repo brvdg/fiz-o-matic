@@ -1,5 +1,5 @@
 /****************************************************
- * FIZ-o-matic
+ * fiz-o-matic
  * https://fiz-o-matic.net/
  *
  * Author: Brun
@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "200216a"
+#define BUILD "20200601a"
 
 
 #include <stdarg.h>
@@ -28,6 +28,9 @@
 // include configuration file
 #include "config.h"
 #include "hardware.h"
+
+
+#include "tinygsm.h"
 #include "vars.h"
 
 /*
@@ -50,6 +53,9 @@ RTCZero rtc;
 #include <SDU.h>
 #endif
 
+#ifdef TinyGPS
+#include <TinyGPS++.h>
+#endif
 
 /*
  * Timer Interrupts
@@ -59,6 +65,9 @@ Adafruit_ZeroTimer zt4 = Adafruit_ZeroTimer(4);
 void TC4_Handler(){
   Adafruit_ZeroTimer::timerHandler(4);
 }
+
+// internal Watchdog
+#include <Adafruit_SleepyDog.h>
 
 
 void setup() {
@@ -135,6 +144,13 @@ void setup() {
   else {
     notify(BOOTMSG, F("#SD is disabled"));
   }
+
+  #ifdef HW_FEATHER_EXPRESS
+  init_spiflash();
+  spiflash_open_config();
+  #endif
+
+
   notify(BOOTMSG, F("#check plausibility"));
   check_plausibility();
 
@@ -171,6 +187,12 @@ void setup() {
   tinygsm_init();
   tinygsm_gps_init();
 
+
+  /*
+   *
+   */
+  tinygps_init();
+
   /*
    * OneWire Bus
    */
@@ -188,40 +210,18 @@ void setup() {
   rtc.begin();
 
 
+  // internal Watchdog
+  notify(BOOTMSG, F("#Init Watchdog"));
+  //Watchdog.enable(4000);
+
   /*
    * enable Timer
    */
-  // set time for Watchdog
+  notify(BOOTMSG, F("#Init Timer"));
+  // set time for Software Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
 
-/*
-  // Enable clock for TC
-  REG_GCLK_CLKCTRL = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID ( GCM_TCC2_TC3 ) ) ;
-  while ( GCLK->STATUS.bit.SYNCBUSY == 1 ); // wait for sync
-  // The type cast must fit with the selected timer mode
-  TcCount16* TC = (TcCount16*) TC3; // get timer struct
-  TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  TC->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;  // Set Timer counter Mode to 16 bits
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_NFRQ; // Set TC as normal Normal Frq
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024;   // Set perscaler
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  // TC->PER.reg = 0xFF;   // Set counter Top using the PER register but the 16/32 bit timer counts allway to max
-  // while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  TC->CC[0].reg = 0xFFF;
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-  // Interrupts
-  TC->INTENSET.reg = 0;              // disable all interrupts
-  TC->INTENSET.bit.OVF = 1;          // enable overfollow
-  //TC->INTENSET.bit.MC0 = 1;          // enable compare match to CC0
-  // Enable InterruptVector
-  NVIC_EnableIRQ(TC3_IRQn);
-  // Enable TC
-  TC->CTRLA.reg |= TC_CTRLA_ENABLE;
-  while (TC->STATUS.bit.SYNCBUSY == 1); // wait for sync
-*/
+
 
   //
   /********************* Timer #3, 8 bit, one callback with adjustable period = 350KHz ~ 2.86us for DAC updates */
@@ -229,7 +229,6 @@ void setup() {
                 TC_COUNTER_SIZE_8BIT,   // bit width of timer/counter
                 TC_WAVE_GENERATION_MATCH_PWM  // match style
                 );
-
   zt3.setPeriodMatch(150, 1, 0); // ~350khz, 1 match, channel 0
   zt3.setCallback(true, TC_CALLBACK_CC_CHANNEL0, Timer3Callback0);  // set callback
   zt3.enable(true);*/
@@ -254,8 +253,10 @@ void setup() {
 
 
 
-  // Watchdog
+  // Software Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
+
+
 
 
   //#ifdef U8G2_DISPLAY
@@ -272,16 +273,20 @@ void setup() {
 
 
   //Scheduler.startLoop(loop1);
-  Scheduler.startLoop(status_checker);
+  //Scheduler.startLoop(status_checker);
 
   //Scheduler.startLoop(tinygsm_gps_loop);
   //Scheduler.startLoop(tinygsm_loop);
   Scheduler.startLoop(display_loop);
 
+  //Scheduler.startLoop(watchdog_loop);
+
 
   message(F("#---> Ready after "));
   message(String(millis()/1000, DEC));
   message(F("s\n"));
+
+
 
 
 }
@@ -290,11 +295,17 @@ void setup() {
  * The main loop
  */
 void loop() {
+  // internal Wtchdog
+  Watchdog.reset();
 
   // Check millis rollover
-  if ( millisRollover )
-  {
+  if ( millisRollover() ) {
+    message ( INFO_MSG, "millisRollover");
     status_checker_timer = 0;
+    tinygsm_timer = 0;
+    tinygsm_sms_timer = 0;
+    tinygsm_blynk_timer = 0;
+    gps_timer = 0;
     online_intervalll_timer = 0;
     display_update_timer = 0;
     alarm_timer = 0;
@@ -310,6 +321,12 @@ void loop() {
   }
 
   tinygsm_loop();
+
+  tinygps_loop();
+
+  //display_loop();
+
+  //status_checker();
 
   // Reset the watchdog with every loop to make sure the sketch keeps running.
   // If you comment out this call watch what happens after about 4 iterations!
@@ -364,14 +381,7 @@ void loop() {
   // get the Port values
   IO_loop();
 
-  //#ifdef U8G2_DISPLAY
-  #ifdef ENABLE_DISPLAY
-  if ( display_update_timer < millis() ) {
-    display_update_timer = millis() + U8G2_DISPLAY_UPDATE_TIMER;
-    //display_loop();
-    //Serial.println("DISPLAY...");
-  }
-  #endif // U8G2_DISPLAY
+  //display_loop();
 
   // Button...
   //button();
@@ -381,33 +391,30 @@ void loop() {
   custom_loop();
   #endif // CUSTOM
 
-  delay(10);
+  //delay(10);
 }
 
-void loop1 () {
-  //if ( !tinygsm_lock ) {
-  //  tinygsm_lock = true;
 
-    //if ( timer_check(&tinygsm_gps_timer, TinyGSM_GPS_TIMER) ) {
-    //  if ( tinygsm_gps_ok ) {
-        //tinygsm_gps_loop();
-    //  }
-    //}
-  //  tinygsm_lock = false;
-    //message(INFO_MSG, F("loop1 finished\n"));
-  //}
-  delay(100);
+
+void watchdog_loop () {
+  Watchdog.reset();
+  delay(500);
   yield();
 }
 
 
 
+/*
+  returns TRUE if timer + delay is greather then millis()
+*/
 bool timer_check(unsigned long *timer, unsigned long delay)
 {
 
   if ( *timer + delay < millis() ) {
-    //message(INFO_MSG, F("#it's time\n"));
+    //message(INFO_MSG, String(millis(), DEC));
+    //message(INFO_MSG, String(*timer, DEC));
     *timer = millis();
+    //message(INFO_MSG, String(*timer, DEC));
     return true;
   }
   if ( *timer > millis() ) {
@@ -497,13 +504,16 @@ void Timer4Callback0()
 
   }
 
-  // Wagchdog
+  // Software Watchdog
   if ( watchdog_timer < millis() ) {
       // reset the system
       Serial.println(F("#Watchdog reset"));
       flash_watchdog_reset.write(true);
       NVIC_SystemReset();
   }
+
+  // internal Wtchdog
+  //Watchdog.reset();
 
   // Button ...
   button();

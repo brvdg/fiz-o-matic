@@ -1,9 +1,13 @@
-/***************************************************
+/****************************************************
+ * FIZ-o-matic
+ * https://fiz-o-matic.net/
+ *
  *  This sketch is for I2C Bus functions.
  *
- *  Author: Brun
- *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
+
 
 #ifdef I2C
 #include <Wire.h>

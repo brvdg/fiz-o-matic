@@ -34,9 +34,11 @@ byte saved_config = 0;
  * Debugging Variable
  */
 #ifdef DEBUG
-byte debug = 127;
+//byte debug = 127;
+boolean debug = true;
 #else
-byte debug = 0;
+//byte debug = 0;
+boolean debug = false;
 #endif
 
 #define ERROR 0
@@ -44,7 +46,7 @@ byte debug = 0;
 #define DEBUG_MSG 2
 //#define DEBUG_TINYGSM 4
 #define NOTIFY 4
-#define DEBUG_SD 8
+#define STORAGE 8
 #define DEBUG_IO 16
 #define GPS 32
 #define TINYGSM 64
@@ -65,6 +67,9 @@ byte debug = 0;
 #define SMS 64
 #define BOOTMSG 128
 bool ignore_notify = false;
+
+int NotifyLast = 0;
+bool NotifyActive = false;
 
 
 /*
@@ -317,62 +322,6 @@ int lastfile = 0;
 byte lastfile_config = 0;
 
 
-/*
- * TINYGSM library
- */
-unsigned long tinygsm_timer = 0;
-unsigned long tinygsm_gps_timer = 0;
-
-boolean tinygsm_enabled = true;
-boolean blynk_enabled = true;
-boolean sms_enabled = true;
-boolean gps_enabled = true;
-boolean blynk_report = true;
-
-boolean tinygms_ok = false;
-boolean tinygsm_gps_ok = false;
-
-boolean go_online = false;
-boolean go_offline = false;
-boolean tinygsm_lock = false;
-
-int gsm_signal = 0;
-
-boolean use_gps_speed = USE_GPS_SPEED;
-
-boolean gps_fixstatus;
-int gps_fixerrcnt = 0;
-int gps_year;
-int gps_day;
-int gps_month;
-int gps_hour;
-int gps_minute;
-int gps_second;
-float gps_speed;
-uint8_t gps_speed_max = 0;
-uint8_t gps_speed_max_trip = 0;
-uint8_t gps_speed_avg = 0;
-uint8_t gps_speed_avg_trip = 0;
-uint16_t gps_course;
-int gps_altitude;
-int gps_view_satellites;
-int gps_used_satellites;
-int gps_altitude_blynk;
-int gps_view_satellites_blynk = 255;
-int gps_used_satellites_blynk = 255;
-float gps_latitude, gps_longitude;
-float gps_latitude_old = 0;
-float gps_longitude_old = 0;
-float gps_latitude_lastlog = 0;
-float gps_longitude_lastlog = 0;
-float gps_latitude_blynk = 0;
-float gps_longitude_blynk = 0;
-float gps_latitude_geo_fence = 0;
-float gps_longitude_geo_fence = 0;
-boolean gps_fix = false;
-uint32_t gps_distance = 0;
-
-boolean gprs_tracking = false;
 
 
 /*
@@ -384,7 +333,8 @@ unsigned long trip_dist_all_last = 0;
 unsigned long trip_dist_all = 0;
 
 unsigned long trip_time = 0;
-unsigned long trip_time_last = 0;
+//unsigned long trip_time_last = 0;
+//unsigned long trip_time_all = 0;
 
 unsigned long trip_timer = 0;
 
@@ -561,8 +511,8 @@ const struct_ports ports[] = {
   //{"door_port", "Door Port", &door_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   //{"oil_temp_port", "Oil Temp. Port", &oil_temp_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   //{"oil_pressure_port", "Oil Press. Port", &oil_pressure_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"temp_out_port", "Temp. outsise", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
-  {"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"temp_out_port", "Temp. outsise", &temp_out_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  //{"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"alarm_port", "Alarm", &alarm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true},
   //{"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
  };
@@ -629,12 +579,12 @@ const struct_features features[] {
   {"tinygsm_enabled", "TinyGSM enabled", &tinygsm_enabled},
   //{"internet_enabled", "Internet enabled", &internet_enabled},
   {"blynk_enabled", "BLYNK enabled", &blynk_enabled},
-  //{"sms_enabled", "SMS enabled", &sms_enabled},
+  {"sms_enabled", "SMS enabled", &sms_enabled},
   {"gps_enabled", "GPS enabled", &gps_enabled},
   {"blynk_report", "Push reset/boot", &blynk_report},
-  {"display_temp", "Display Temperature", &display_temp},
+  //{"display_temp", "Display Temperature", &display_temp},
   //{"use_gps_speed", "use GPS Speed", &use_gps_speed,},
-  {"onewire_enabled", "enable 1Wire Bus", &onewire_enabled}
+  //{"onewire_enabled", "enable 1Wire Bus", &onewire_enabled}
 };
 
 
