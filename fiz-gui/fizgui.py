@@ -76,7 +76,7 @@ def receive():
             ui.textEdit.clear
             #ui.textEdit.setText("# fiz-o-matic configuration")
 
-        if text == "#================#":
+        if "#fiz-o-matic >" in text:
             configstring = False
 
         if ui.radioButton.isChecked():
