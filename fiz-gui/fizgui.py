@@ -153,7 +153,7 @@ def main():
             ui.textEdit.append("Found Port")
             ui.textEdit.append("Port Name: " + serialport.portName())
             ui.textEdit.append("Description: " + serialport.description())
-            ui.textEdit.append("Manufacture: " + serialport.manufacturer())
+            ui.textEdit.append("Manufacturer: " + serialport.manufacturer())
             ui.textEdit.append("")
 
             ui.comboBox.addItem(serialport.portName())
@@ -166,7 +166,7 @@ def main():
                 ui.textEdit.append("Found Port")
                 ui.textEdit.append("Port Name: " + serialport.portName())
                 ui.textEdit.append("Description: " + serialport.description())
-                ui.textEdit.append("Manufacture: " + serialport.manufacturer())
+                ui.textEdit.append("Manufacturer: " + serialport.manufacturer())
                 ui.textEdit.append("System Location: " + serialport.systemLocation())
                 ui.textEdit.append("")
 
@@ -189,4 +189,4 @@ if __name__== "__main__":
     try:
         main()
     finally:
-        print ("good by")
+        print ("goodbye")
