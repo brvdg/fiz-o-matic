@@ -18,16 +18,31 @@
 #define TINY_GSM_RX_BUFFER 2048
 #endif
 
+/*
+ * Blynk definations
+ */
+
+#ifdef DEBUG
+  #define TINY_GSM_DEBUG Serial
+  #define BLYNK_PRINT Serial // Defines the object that is used for printing
+  #define BLYNK_DEBUG        // Optional, this enables more detailed prints
+#endif
+
+//#define TINY_GSM_YIELD() { delay(10); yield(); }
+
+// Select your modem:
+//#define TINY_GSM_MODEM_SIM800
+#define TINY_GSM_MODEM_SIM808
+//#define TINY_GSM_MODEM_SIM900
+//#define TINY_GSM_MODEM_A6
+//#define TINY_GSM_MODEM_M590
+
+#include <TinyGsmClient.h>
+#include <BlynkSimpleTinyGSM.h>
+
 
 TinyGsm modem(Serial1);
 
-WidgetTerminal terminal(BLYNK_VIRTUAL_terminal);
-WidgetMap myMap(BLYNK_VIRTUAL_map);
-WidgetLED geo_fence_armed_led(BLYNK_VIRTUAL_geo_fence_armed_led);
-WidgetLED geo_fence_led(BLYNK_VIRTUAL_geo_fence_led);
-WidgetLED online_LED(BLYNK_VIRTUAL_online_LED);
-WidgetLED armed_led(BLYNK_VIRTUAL_armed_led);
-WidgetLED alarm_led(BLYNK_VIRTUAL_alarm_led);
 
 
 boolean blynk = false;
@@ -119,8 +134,23 @@ void tinygsm_init()
 }
 
 
-void tinygsm_info() {
+String tinygsm_info() {
 
+  String msg;
+
+  msg = "=== TinyGSM Info ===\n";
+
+  msg += "CCID: " + modem.getSimCCID() + "\n";
+  msg += "IMEI: " + modem.getIMEI() + "\n";
+  msg += "Operator: " + modem.getOperator() + "\n";
+  IPAddress local = modem.localIP();
+  msg += "Local IP: " + String(local[0]) + "." + String(local[1]) + "." + String(local[2]) + "." + String(local[3]) + "\n";
+  msg += "Signal quality: " + String(modem.getSignalQuality(), 0) + "\n";
+  msg += "GSM location: " + modem.getGsmLocation() + "\n";
+
+  return msg;
+
+  /*
   String ccid = modem.getSimCCID();
   message(F("CCID: "));
   message(ccid);
@@ -145,7 +175,7 @@ void tinygsm_info() {
   String gsmLoc = modem.getGsmLocation();
   message(F("\nGSM location: "));
   message(gsmLoc);
-  message(F("\n\n"));
+  message(F("\n\n"));*/
 
 }
 
@@ -206,6 +236,8 @@ void tinygsm_loop()
 
   tinygsm_lock = true;
 
+  gsm_signal = modem.getSignalQuality();
+
   // should we go online or offline?
   if ( go_offline ) {
     message(TINYGSM, F("#go_offline is set\n"));
@@ -251,6 +283,12 @@ void tinygsm_loop()
         }
       }
 
+      // send a push message
+      if ( blynk_push_msg != "" ){
+        Blynk.notify(blynk_push_msg);
+        blynk_push_msg = "";
+      }
+
 
       if (gps_used_satellites != gps_used_satellites_blynk) {
         Blynk.virtualWrite(BLYNK_VIRTUAL_gps_used_satellites, gps_used_satellites);
@@ -285,6 +323,8 @@ void tinygsm_loop()
       if ( hum_in_port != 0x00) {
         Blynk.virtualWrite(BLYNK_VIRTUAL_hum_in, hum_in);
       }
+
+      Blynk.virtualWrite(BLYNK_VIRTUAL_bord_voltage, bord_voltage);
 
 
       Blynk.run();
@@ -409,70 +449,6 @@ void tinygsm_gps_loop() {
   yield();
 }
 
-void tinygsm_sms() {
-
-  // exit if SIM is not OK
-  if ( !tinygms_ok ) return;
-
-  //Watchdog.disable();
-
-  int numofsms = getNumSMS();
-
-
-  char sender[18];
-
-  message(TINYGSM, F("Read SMS"));
-  for (int i = 1; i < numofsms + 1; i++) {
-    message(TINYGSM, F("Read SMS# "));
-    message(TINYGSM, String(i, DEC));
-    String smsmsg = readSMS(i, sender);
-    smsmsg.toLowerCase();
-    //    sender.replace('"', 0);
-    message(TINYGSM, F("#Sender: "));
-    message(TINYGSM, sender);
-    message(TINYGSM, F("Message: "));
-    //TINYGSM_DEBUG_PRINTLN(F("##############################"));
-    message(TINYGSM, smsmsg);
-    //TINYGSM_DEBUG_PRINTLN(F("##############################"));
-
-    // Check if keyword present
-    if ( smsmsg.indexOf(SMS_Keyword) >= 0 ) {
-      if ( smsmsg.indexOf(F("on")) >= 0 ) {
-        go_online = true;
-        message(TINYGSM,F("delete SMS"));
-        deleteSMS(i);
-      }
-      else if ( smsmsg.indexOf("off") >= 0 ) {
-        Blynk.notify(F("disconnect Blynk"));
-
-        if ( tinygsm_go_offline() ) {
-          online = false;
-          message(TINYGSM,F("delete SMS"));
-          deleteSMS(i);
-          message(TINYGSM,F("Disconnected"));
-        }
-      }
-      else if ( smsmsg.indexOf("status") >= 0 ) {
-        //Watchdog.reset();
-        modem.sendSMS(sender, F("I'm okay."));
-        //Watchdog.reset();
-        message(TINYGSM,F("delete SMS"));
-        deleteSMS(i);
-      }
-      else {
-        parse_config_string( smsmsg.substring( smsmsg.indexOf(" ") ) );
-        message(TINYGSM,F("delete SMS"));
-        deleteSMS(i);
-      }
-    }
-
-    message(TINYGSM,F("delete SMS"));
-    deleteSMS(i);
-
-  }
-  //Watchdog.enable(4000);
-  yield();
-}
 
 boolean tinygsm_go_online() {
 
@@ -549,6 +525,7 @@ boolean tinygsm_go_online() {
       }
       startmsg = false;
     }
+
 
     online_intervalll_timer = millis() + 10000;
     online = true;
@@ -634,19 +611,7 @@ void tinygsm_set_baud() {
 }
 
 
-void tinygsm_alarm() {
-  message(INFO_MSG ,F("tinygsm_alarm"));
-  //modem.sendSMS(MYNUMBER, F("ALARM!!!"));
-  Blynk.notify(F("ALARM!!!"));
 
-  blynk_msg(F("ALARM!!!"));
-
-  alarm_led.on();
-
-  if (geo_fence_alarm) {
-    geo_fence_led.on();
-  }
-}
 
 void blynk_msg( String msg ) {
   sprintf(buf, "%02d:%02d:%02d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
@@ -666,191 +631,7 @@ void blynk_msg_float( String msg, float value ) {
 }
 
 
-/*
- *   Blynk Functions
- */
-BLYNK_CONNECTED() {
-  message(TRACE_MSG ,F("BLYNK_CONNECTED"));
-  Blynk.syncAll();
-}
 
-BLYNK_APP_DISCONNECTED() {
-  message(TRACE_MSG ,F("BLYNK_APP_DISCONNECTED"));
-  blynk_msg(F("app disconected"));
-}
-
-BLYNK_APP_CONNECTED() {
-  message(TRACE_MSG ,F("BLYNK_APP_CONNECTED"));
-  blynk_msg(F("app conected"));
-}
-
-
-BLYNK_WRITE(BLYNK_VIRTUAL_stay_online) {
-  message(TRACE_MSG ,F("BLYNK_WRITE(BLYNK_VIRTUAL_stay_online)"));
-  int value = param.asInt(); // Get value as integer
-
-
-  if ( value == 1 ) {
-    if ( !stay_online ) {
-      stay_online = true;
-      blynk_msg(F("stay_online turned on"));
-      message(TINYGSM, F("stay_online turned off"));
-    }
-  }
-  else {
-    if ( stay_online ) {
-      stay_online = false;
-      blynk_msg(F("stay_online turned off"));
-      message(TINYGSM, F("#stay_online turned off"));
-      online_intervalll_timer = millis() + 10000;
-    }
-  }
-}
-
-BLYNK_WRITE(BLYNK_VIRTUAL_geo_fence_distance) {
-  message(TRACE_MSG ,F("BLYNK_WRITE(BLYNK_VIRTUAL_geo_fence_distance)"));
-  int value = param.asInt(); // Get value as integer
-  if ( value != geo_fence_distance ) {
-    message(INFO_MSG ,F("set geo-fance distance to "));
-    message(INFO_MSG ,String(value));
-    message(INFO_MSG ,F("\n"));
-    value += 5;
-    value = ( value / 10 ) * 10;
-    geo_fence_distance = value;
-    Blynk.virtualWrite(BLYNK_VIRTUAL_geo_fence_distance, value);
-
-    if ( geo_fence_distance != 0 ) {
-      blynk_msg_float(F("geo fance distance set to: "), value);
-    }
-    else {
-      blynk_msg(F("geo fence disabled"));
-    }
-  }
-}
-
-BLYNK_WRITE(BLYNK_VIRTUAL_alarm) {
-  message(TRACE_MSG ,F("BLYNK_WRITE(BLYNK_VIRTUAL_alarm)"));
-  /*while ( tinygsm_loop_running ) {
-    message(TRACE_MSG ,F("#waiting for a free slot\n"));
-    delay(500);
-    yield();
-  }
-  tinygsm_loop_running = true;*/
-  int value = param.asInt(); // Get value as integer
-  if ( value == 1 ) {
-    //blynk_alarm = true;
-    if ( !alarm_system_armed ) {
-      alarm_system_armed = true;
-      armed_led.on();
-      blynk_msg(F("alarm_system turned on"));
-    }
-  }
-  else {
-    if ( alarm_system_armed ) {
-      alarm_system_armed = false;
-      alarm_system_triggered = false;
-      armed_led.off();
-      alarm_led.off();
-      blynk_msg(F("alarm_system turned off"));
-    }
-  }
-  //tinygsm_loop_running = false;
-}
-
-BLYNK_WRITE(BLYNK_VIRTUAL_aux_heater) {
-  message(TRACE_MSG ,F("BLYNK_WRITE(BLYNK_VIRTUAL_aux_heater)"));
-  int value = param.asInt(); // Get value as integer
-
-
-  if ( value == 1 ) {
-    if ( aux_heater_status == STATE_off ) {
-      set_auxiliary_heating(true);
-    }
-  }
-  else {
-    if ( aux_heater_status == STATE_on ) {
-      set_auxiliary_heating(false);
-    }
-  }
-}
-
-
-/*
-*
-* Special function which are not implemented in the TinyGSM library
-*
-*/
-
-int getNumSMS() {
-
-    modem.sendAT(GF("+CMGF=1"));
-    if (modem.waitResponse() != 1) {
-        return 0;
-    }
-
-    modem.sendAT(GF("+CPMS?"));
-    if (modem.waitResponse(GF(GSM_NL "+CPMS:")) != 1) {
-        return 0;
-    }
-    String res = modem.stream.readStringUntil('\n');
-    int index1 = res.indexOf(",");
-    int index2 = res.indexOf(",", index1+1);
-    String tmp = res.substring(index1+1,index2);
-    modem.waitResponse();
-    //res.trim();
-    tmp.trim();
-    //return res;
-    //int num = tmp.toInt();
-    return tmp.toInt();
-}
-
-String readSMS(int num, char *sender) {
-    String buffer;
-
-    modem.sendAT(GF("+CMGF=1"));
-    if (modem.waitResponse() != 1) {
-        return "";
-    }
-    modem.sendAT(GF("+CSDH=1"));
-    if (modem.waitResponse() != 1) {
-        return "";
-    }
-
-
-    modem.sendAT(GF("+CMGR="), num, GF(""));
-    if (modem.waitResponse(GF(GSM_NL "+CMGR:")) != 1) {
-        return "";
-    }
-
-    modem.stream.readStringUntil(',');
-    buffer = modem.stream.readStringUntil(',');
-    buffer.replace('"', ' ');
-    buffer.trim();
-    buffer.toCharArray(sender, 18);
-
-    modem.stream.readStringUntil('\r');
-
-    buffer = "";
-
-    delay(20); // Wait a moment to get data into the buffer
-    while (modem.stream.available()) {
-        char c = modem.stream.read();
-        buffer = buffer + c;
-    }
-
-    String res = buffer;
-    modem.waitResponse();
-    res.trim();
-    return res;
-}
-
-boolean deleteSMS(int num) {
-    modem.sendAT(GF("+CMGD="), num, GF(""));
-    if (modem.waitResponse(GF(GSM_NL "+CMGD:")) != 1) {
-        return false;
-    }
-    return true;
-}
 
 #else
 
@@ -859,7 +640,7 @@ void tinygsm_gps_init() {};
 
 void tinygsm_loop() {};
 void blynk_msg(String) {};
-void tinygsm_info() {};
+String tinygsm_info() {};
 void tinygsm_set_baud() {};
 void tinygsm_alarm() {};
 

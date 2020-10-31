@@ -55,15 +55,50 @@ bool no_long_press = false;
 #endif
 
 
+/*
+* fiz-o-matic with feather express
+*/
+
+#if defined HW_FEATHER_EXPRESS
+#define TinyGSM
+#define TinyGSM_PWRKEY 5
+//#define TinyGPS
+
+#define SPIFLASH
+/*
+   analog input multiplicator
+   A0/A1 range 0-15.6V
+   15.6 / 1024 = 0.015234
+   A2/A3 range 0-10V
+   10 / 1024 = 0.009765
+*/
+#define A0_MULTIPLICATOR 0.015234
+#define A1_MULTIPLICATOR 0.015234
+#define A2_MULTIPLICATOR 0.009765
+#define A3_MULTIPLICATOR 0.009765
+#define A4_COUNTER
+#define A5_MULTIPLICATOR 0.015234
+
+// for Dalles DS18B20 Temperatursensor
+#define ONEWIRE
+#define ONE_WIRE_BUS 6
+#define ONE_WIRE_BUS_PORT 0x07 // need this declaration for plausibility check
+
+
+#define GPIO6
+#define GPIO13
+
+#endif //HW_FEATHER_EXPRESS
+
+
+
 
 /*
  * fiz-o-matic 0.8 with Adafruit Trinket
  */
 #if defined HW_TRINKET
-
 #define TinyGSM
 #define TinyGSM_PWRKEY 1
-
 #endif //HW_TRINKET
 
 
@@ -102,36 +137,17 @@ bool no_long_press = false;
 #define A4_COUNTER
 //#define A5_COUNTER
 
+// for Dalles DS18B20 Temperatursensor
+#define ONEWIRE
+#define ONE_WIRE_BUS 6
+#define ONE_WIRE_BUS_PORT 0x07 // need this declaration for plausibility check
+
 #define GPIO6
 #define GPIO13
 
 #endif //HW_FEATHER
 
-#if defined HW_FEATHER_EXPRESS
-#define TinyGSM
-#define TinyGSM_PWRKEY 5
-//#define TinyGPS
 
-#define SPIFLASH
-/*
-   analog input multiplicator
-   A0/A1 range 0-15.6V
-   15.6 / 1024 = 0.015234
-   A2/A3 range 0-10V
-   10 / 1024 = 0.009765
-*/
-#define A0_MULTIPLICATOR 0.015234
-#define A1_MULTIPLICATOR 0.015234
-#define A2_MULTIPLICATOR 0.009765
-#define A3_MULTIPLICATOR 0.009765
-#define A4_COUNTER
-#define A5_MULTIPLICATOR 0.015234
-
-
-#define GPIO6
-#define GPIO13
-
-#endif //HW_FEATHER_EXPRESS
 
 
 

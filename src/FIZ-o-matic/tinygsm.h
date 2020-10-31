@@ -9,6 +9,7 @@ unsigned long tinygsm_blynk_timer = 0;
 boolean tinygsm_enabled = true;
 boolean blynk_enabled = true;
 boolean sms_enabled = true;
+boolean sms_notify = true;
 boolean gps_enabled = true;
 boolean blynk_report = false;
 
@@ -56,8 +57,31 @@ boolean gps_fix = false;
 uint32_t gps_distance = 0;
 float accuracy = 0;
 
+String blynk_push_msg = "";
+
 boolean gprs_tracking = false;
 
+/*
+ * Blynk definations
+ */
+
+#ifdef DEBUG
+  #define TINY_GSM_DEBUG Serial
+  #define BLYNK_PRINT Serial // Defines the object that is used for printing
+  #define BLYNK_DEBUG        // Optional, this enables more detailed prints
+#endif
+
+//#define TINY_GSM_YIELD() { delay(10); yield(); }
+
+// Select your modem:
+//#define TINY_GSM_MODEM_SIM800
+#define TINY_GSM_MODEM_SIM808
+//#define TINY_GSM_MODEM_SIM900
+//#define TINY_GSM_MODEM_A6
+//#define TINY_GSM_MODEM_M590
+
+#include <TinyGsmClient.h>
+#include <BlynkSimpleTinyGSM.h>
 
 
 #ifdef TinyGSM

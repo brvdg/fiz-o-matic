@@ -75,13 +75,13 @@ void spiflash_open_config() {
 }
 
 void spiflash_save_config() {
-  message(STORAGE, F("#Writing config to SPI FLASH\n"));
+  message(STORAGE, F("#Writing config to SPI FLASH"));
 
   if ( !SPI_lock ) {
     SPI_lock = true;
 
     if ( !fatfs.remove("config.txt")) {
-      message(STORAGE, F("#can't remove config.txt\n"));
+      message(STORAGE, F("#can't remove config.txt"));
     }
 
     spiflash_config = fatfs.open("config.txt", FILE_WRITE);
@@ -108,6 +108,11 @@ void spiflash_save_config() {
       spiflash_config.println(F("#SMS Keyword for authentication"));
       spiflash_config.print(F("sms_keyword="));
       spiflash_config.println(sms_keyword);
+      spiflash_config.println(F("#My Mobile Number for Notifications"));
+      spiflash_config.print(F("my_number="));
+      spiflash_config.println(my_number);
+
+
 
 
       for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
@@ -149,8 +154,8 @@ void spiflash_save_config() {
 
 
     SPI_lock = false;
-    message(STORAGE, F("#OK\n"));
-    message(STORAGE, F("#Done!\n"));
+    message(STORAGE, F("#OK"));
+    message(STORAGE, F("#Done!"));
   }
 }
 

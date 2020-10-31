@@ -8,7 +8,16 @@
  * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
 
+ /*
+    check button state and debounce it
 
+    Funktions...
+    1 = short pressed
+    2 = long pressed
+    3 = long pressed release
+    4 = long pressed repeat
+    5 = double press?
+ */
 void button() {
 
   if ( button_timer < millis() ) {
@@ -23,7 +32,7 @@ void button() {
 
         button_1_low++;
         button_1_high = 0;
-        
+
       }
       else {
         button_1_high++;

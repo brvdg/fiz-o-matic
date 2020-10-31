@@ -8,35 +8,6 @@
  * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
 
- /****************************************************
-   fiz-o-matic Configuration
-   for detailed informations see
-   https://github.com/brvdg/busputer/wiki
- ****************************************************/
-
-/*
-   Hardware configuration
-*/
-
-//#define HW_FEATHER
-//#define HW_TRINKET
-
-// Display Configuration
-//#define U8G2_DISPLAY
-//#define DOGS102
-//#define OLED
-//#define OLED_FULL
-//#define NOKIA
-
-
-
-
-// Port defination
-//#ifdef U8G2_DISPLAY
-//#define DISPLAY_BG_LED 10 //turn this off if a OLED ist used
-//#define U8G2_DISPLAY_CS 11
-//#define U8G2_DISPLAY_DC 12
-//#define U8G2_DISPLAY_RST 10
 
 // defination of LCD dimmer
 #define DIMMER 2 //Port for the cluster dimmer source
@@ -50,7 +21,7 @@
 
 //#define CLOCK_VIEW 1 // 1 = clock and temperature / 0 = clock and date
 
-#define DISPLAY_TEMP false // display temperature insted of date in standby
+//#define DISPLAY_TEMP false // display temperature insted of date in standby
 
 // enable SD card
 //#define SDCard
@@ -62,13 +33,13 @@
 #define APN "internet.t-mobile"
 #define APN_USER "t-mobile"
 #define APN_PASS "tm"
-#define SMS_Keyword "fiz"
+#define SMS_KEYWORD "fiz"
 
 #ifndef BLYNK_KEY
 #define BLYNK_KEY "0123456789abcd"
 #endif
 
-#define MYNUMBER "+4915141284285"
+#define MY_NUMBER "+4915141284285"
 #define BLYNK_DEVICE_NAME "MyCar"
 
 // if this is turned on
@@ -144,7 +115,8 @@
 
 // Alarm output
 #define ALARM_OUT
-#define ALARM_PORT 0x08
+#define ALARM_PORT 13
+//#define ALARM_PORT 0x08
 
 
 // bord voltage
@@ -160,10 +132,7 @@
 // Port for Button input
 #define BUTTON_PIN_1 9
 
-// for Dalles DS18B20 Temperatursensor
-#define ONEWIRE
-#define ONE_WIRE_BUS 6
-#define ONE_WIRE_BUS_PORT 0x07 // need this declaration for plausibility check
+
 
 // I2S Sensors
 #define I2C
@@ -199,7 +168,7 @@
 //#define TINY_GSM_MODEM_M590
 
 #include <TinyGsmClient.h>
-#include <BlynkSimpleSIM800.h>
+#include <BlynkSimpleTinyGSM.h>
 
 
 

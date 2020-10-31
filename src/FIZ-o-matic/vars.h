@@ -46,13 +46,18 @@ boolean debug = false;
 #define DEBUG_MSG 2
 //#define DEBUG_TINYGSM 4
 #define NOTIFY 4
+#define SERIAL_MSG 6
 #define STORAGE 8
+#define ALARM 10
 #define DEBUG_IO 16
 #define GPS 32
 #define TINYGSM 64
+#define BLYNK_MSG 68
 //#define DEBUG_ 32
 //#define TRACE_TINYGSM 64
 #define TRACE_MSG 128
+#define U8G2_MSG 132
+
 
 /*
  * definations for different kinds of notifycations
@@ -119,6 +124,11 @@ byte dimmer_min = 0;
 byte dimmer_max = 10;
 byte display_active = 5;
 //unsigned long display_active_timer = 0;
+float batt1_voltage = 0;
+byte batt1_voltage_port = 0x00;
+float batt2_voltage = 0;
+byte batt2_voltage_port = 0x00;
+
 
 
 
@@ -216,7 +226,8 @@ String apn = APN;
 String apn_user = APN_USER;
 String apn_pass = APN_PASS;
 String blynk_key = BLYNK_KEY;
-String sms_keyword = SMS_Keyword;
+String my_number = MY_NUMBER;
+String sms_keyword = SMS_KEYWORD;
 boolean online = false;
 boolean startmsg = true;
 byte online_intervall = ONLINE_INTERVALL;
@@ -227,7 +238,7 @@ boolean geo_fence_armed = false;
 boolean geo_fence_alarm = false;
 boolean geo_fence_alarm_system = false;
 boolean stay_online = false;
-int geo_fence_distance = 100;
+byte geo_fence_distance = 100;
 boolean blynk_geo_fence_alarmed = false;
 unsigned long online_intervalll_timer = 0;
 boolean blynk_alarm = false;
@@ -304,8 +315,9 @@ unsigned long display_active_timer = 0;
 int MenuValuesPos = 0;
 int MenuConfigPos = 0;
 boolean MenuEdit = false;
+String display_message = "";
 
-boolean display_temp = DISPLAY_TEMP;
+//boolean display_temp = DISPLAY_TEMP;
 
 
 /*
@@ -361,6 +373,14 @@ unsigned long status_checker_timer = 0;
 boolean alarm_system_armed = false;
 boolean alarm_system_triggered = false;
 
+
+/*
+UI definitions
+*/
+#define SRC_NONE 0
+#define SRC_SERIAL 1
+#define SRC_SMS 2
+#define SRC_BLYNK 3
 
 
 
@@ -515,6 +535,8 @@ const struct_ports ports[] = {
   //{"temp_in_port", "Temp. inside", &temp_in_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
   {"alarm_port", "Alarm", &alarm_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true},
   //{"aux_heating_port", "Aux. Heating", &aux_heating_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, true}
+  {"batt1_voltage_port", "Batterie 1 Port", &batt1_voltage_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
+  {"batt2_voltage_port", "Batterie 2 Port", &batt2_voltage_port, DEFAULT_STEPS, MAX_PORTS, MIN_CONFIG, false},
  };
 
 struct struct_config {
@@ -541,6 +563,7 @@ const struct_config config[] = {
 //  {"i2c_led_disp_clock", "LED Clock", &i2c_led_disp_clock, 1, 10, 1},
 //  {"aux_heating_mode", "Aux. Heating Mode", &aux_heating_mode, 1, 2, 0},
 //  {"aux_heating_time", "Aux. Heating Time", &aux_heating_time, 5, 200, 0}
+  {"geo_fence_distance", "Geo fence distance", &geo_fence_distance, 5, 500, 20},
 };
 
 struct struct_values {
@@ -564,7 +587,9 @@ const struct_values values[] {
   {"temp_out", "Temp. out", &temp_out, 1, "\xb0 C", false, false, &temp_out_port},
   {"hum_out", "Humidity out", &hum_out, 1, "\xb0 C", false, false, &hum_out_port},
   {"temp_in", "Temp. in", &temp_in, 1, "\xb0 C", false, false, &temp_in_port},
-  {"hum_in", "Humidity in", &hum_in, 1, "\xb0 C", false, false, &hum_in_port}
+  {"hum_in", "Humidity in", &hum_in, 1, "\xb0 C", false, false, &hum_in_port},
+  {"batt1_voltage", "Batterie 1", &batt1_voltage, 1, "V", true, false, &batt1_voltage_port},
+  {"batt2_voltage", "Batterie 2", &batt2_voltage, 1, "V", true, false, &batt2_voltage_port}
 };
 
 struct struct_features {
@@ -581,10 +606,11 @@ const struct_features features[] {
   {"blynk_enabled", "BLYNK enabled", &blynk_enabled},
   {"sms_enabled", "SMS enabled", &sms_enabled},
   {"gps_enabled", "GPS enabled", &gps_enabled},
-  {"blynk_report", "Push reset/boot", &blynk_report},
+  {"blynk_report", "report reset/boot", &blynk_report},
   //{"display_temp", "Display Temperature", &display_temp},
   //{"use_gps_speed", "use GPS Speed", &use_gps_speed,},
   //{"onewire_enabled", "enable 1Wire Bus", &onewire_enabled}
+  {"sms_notify", "SMS Notifications", &sms_notify},
 };
 
 
@@ -598,6 +624,7 @@ typedef struct {
   char apn_user[12];
   char blynk_key[36];
   char sms_keyword[36];
+  char my_number[16];
 } struckt_char_config;
 
 struckt_char_config char_config;

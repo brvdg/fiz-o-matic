@@ -20,6 +20,10 @@ void message(byte loglevel, String msg) {
     Serial.print(F("!ERROR: "));
     Serial.println(msg);
   }
+  else if ( loglevel == ALARM ) {
+    Serial.print(F("!ALARM: "));
+    Serial.println(msg);
+  }
 
   else if ( debug ){
     if ( loglevel == INFO_MSG ) {
@@ -39,6 +43,12 @@ void message(byte loglevel, String msg) {
     }
     else if ( loglevel == NOTIFY ) {
       Serial.print(F("[NOTIFY]: "));
+    }
+    else if ( loglevel == SERIAL_MSG ) {
+      Serial.print(F("[SERIAL]: "));
+    }
+    else if ( loglevel == BLYNK_MSG ) {
+      Serial.print(F("[BLYNK]: "));
     }
     else {
       Serial.print(F("[ELSE]: "));
@@ -68,11 +78,11 @@ void serial_parse() {
     Serial.print(F("#Debug is: "));
     Serial.println(debug, DEC);
   }
-  else if ( inputString.startsWith(F("print")) ) {
+  /*else if ( inputString.startsWith(F("print")) ) {
     Serial.println(F("#PRINT found"));
     serial_print_status();
     //print_port_values();
-  }
+  }*/
   else if ( inputString.startsWith(F("i2c scan")) ) {
     Serial.println(F("#i2c scan found"));
     i2c_init();
@@ -81,10 +91,10 @@ void serial_parse() {
     Serial.println(F("#Features:"));
     serial_print_features();
   }
-  else if ( inputString.startsWith(F("status")) ) {
+  /*else if ( inputString.startsWith(F("status")) ) {
     Serial.println(F("#Status:"));
     serial_print_status();
-  }
+  }*/
   else if ( inputString.startsWith(F("tail")) ) {
     if (!tail) {
       tail = true;
@@ -95,27 +105,27 @@ void serial_parse() {
       Serial.println(F("#tail is off"));
     }
   }
-  else if ( inputString.startsWith(F("config")) ) {
+  /*else if ( inputString.startsWith(F("config")) ) {
     Serial.println(F("#Config:"));
     serial_print_config();
-  }
+  }*/
   else if ( inputString.startsWith(F("ports")) ) {
     Serial.println(F("#Ports:"));
     serial_print_ports();
   }
-  else if ( inputString.startsWith(F("save")) ) {
+  /*else if ( inputString.startsWith(F("save")) ) {
     Serial.println(F("#Save configuratgion:"));
     check_plausibility();
     save_config();
-  }
+  }*/
   else if ( inputString.startsWith(F("check")) ) {
     Serial.println(F("#Check configuratgion:"));
     check_plausibility();
   }
-  else if ( inputString.startsWith(F("help")) ) {
+  /*else if ( inputString.startsWith(F("help")) ) {
     Serial.println(F("#Help:"));
     serial_print_help();
-  }
+  }*/
   else if ( inputString.startsWith(F("set_alarm")) ) {
     set_alarm(150, 150, 5, true);
   }
@@ -125,14 +135,14 @@ void serial_parse() {
     Serial.println(F("#tinygsm_init:"));
     tinygsm_init();
   }
-  else if ( inputString.startsWith(F("tinygsm_info")) ) {
+  /*else if ( inputString.startsWith(F("tinygsm_info")) ) {
     Serial.println(F("#tinygsm_info:"));
     tinygsm_info();
   }
   else if ( inputString.startsWith(F("gsm_info")) ) {
     Serial.println(F("#gsm_info:"));
     tinygsm_info();
-  }
+  }*/
   else if ( inputString.startsWith(F("tinygsm_gps_init")) ) {
     Serial.println(F("#tinygsm_gps_init:"));
     tinygsm_gps_init();
@@ -200,7 +210,17 @@ void serial_parse() {
     read_virtual_eeprom();
   }
   else if ( inputString.startsWith(F("debug")) ) {
+    if ( debug ) {
+      debug = false;
+      message(SERIAL_MSG, F("disabled debugging"));
+    }
+    else {
+      debug = true;
+      message(SERIAL_MSG, F("enabled debugging"));
 
+    }
+
+    /*
     Serial.print(F("#Debug Level is: "));
     Serial.println(debug, DEC);
     Serial.println(F("#############"));
@@ -213,7 +233,7 @@ void serial_parse() {
     Serial.println(F("#     =6   ->  nothing"));
     Serial.println(F("#     =7   ->  TRACE_TINYGSM"));
     Serial.println(F("#     =8   ->  TRACE"));
-
+    */
 
   }
   else {
@@ -221,7 +241,8 @@ void serial_parse() {
       Serial.println(F("#OK"));
     }
     else {
-      Serial.println(F("#error unknown command"));
+      //Serial.println(F("#error unknown command"));
+      Serial.println(parse_ui_string(inputString, SRC_SERIAL));
     }
   }
 
@@ -368,6 +389,9 @@ void serial_print_config(){
   Serial.println(F("#SMS Keyword for authentication"));
   Serial.print(F("sms_keyword="));
   Serial.println(sms_keyword);
+  Serial.println(F("#My Mobile Number for Notifications"));
+  Serial.print(F("my_number="));
+  Serial.println(my_number);
 
   for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
     Serial.print(F("# "));
