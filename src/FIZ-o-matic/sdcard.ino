@@ -505,6 +505,9 @@ void sdcard_save_config() {
       logfile.println(F("#BLYNK authentication key"));
       logfile.print(F("blynk_key="));
       logfile.println(blynk_key);
+      logfile.println(F("#BLYNK Server (optional)"));
+      logfile.print(F("blynk_server="));
+      logfile.println(blynk_server);
       logfile.println(F("#SMS Keyword for authentication"));
       logfile.print(F("sms_keyword="));
       logfile.println(sms_keyword);

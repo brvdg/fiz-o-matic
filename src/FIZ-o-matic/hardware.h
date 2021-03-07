@@ -84,6 +84,9 @@ bool no_long_press = false;
 #define ONE_WIRE_BUS 6
 #define ONE_WIRE_BUS_PORT 0x07 // need this declaration for plausibility check
 
+//#define CANBUS
+#define CAN_IRQ 11
+#define CAN_CS 12
 
 #define GPIO6
 #define GPIO13

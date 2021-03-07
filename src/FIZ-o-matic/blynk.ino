@@ -65,14 +65,14 @@ BLYNK_WRITE(BLYNK_VIRTUAL_stay_online) {
     if ( !stay_online ) {
       stay_online = true;
       blynk_msg(F("stay_online turned on"));
-      message(TINYGSM, F("stay_online turned off"));
+      message(TINYGSM_MSG, F("stay_online turned off"));
     }
   }
   else {
     if ( stay_online ) {
       stay_online = false;
       blynk_msg(F("stay_online turned off"));
-      message(TINYGSM, F("#stay_online turned off"));
+      message(TINYGSM_MSG, F("#stay_online turned off"));
       online_intervalll_timer = millis() + 10000;
     }
   }

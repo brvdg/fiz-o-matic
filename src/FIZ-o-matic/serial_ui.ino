@@ -35,7 +35,7 @@ void message(byte loglevel, String msg) {
     else if ( loglevel == DEBUG_MSG ) {
       Serial.print(F("[DEBUG]: "));
     }
-    else if ( loglevel == TINYGSM ) {
+    else if ( loglevel == TINYGSM_MSG ) {
       Serial.print(F("[TINYGSM]: "));
     }
     else if ( loglevel == STORAGE ) {
@@ -50,12 +50,13 @@ void message(byte loglevel, String msg) {
     else if ( loglevel == BLYNK_MSG ) {
       Serial.print(F("[BLYNK]: "));
     }
+    else if ( loglevel == BOOTMSG ) {
+      Serial.print(F("[BOOT]: "));
+    }
     else {
       Serial.print(F("[ELSE]: "));
       //Serial.println(msg);
-
     }
-
     Serial.println(msg);
   }
 }
@@ -386,6 +387,9 @@ void serial_print_config(){
   Serial.println(F("#BLYNK authentication key"));
   Serial.print(F("blynk_key="));
   Serial.println(blynk_key);
+  Serial.println(F("#BLYNK Server "));
+  Serial.print(F("blynk_server="));
+  Serial.println(blynk_server);
   Serial.println(F("#SMS Keyword for authentication"));
   Serial.print(F("sms_keyword="));
   Serial.println(sms_keyword);

@@ -54,7 +54,7 @@ double si7021_humidity;
 
 void i2c_init() {
   //TRACE_PRINTLN(F("#i2c_init"));
-  notify(BOOTMSG, F("#Init I2C"));
+  message(BOOTMSG, F("#Init I2C"));
 
 
   byte error, address;

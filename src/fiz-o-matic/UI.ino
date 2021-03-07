@@ -62,6 +62,15 @@ String parse_ui_string(String msg, uint8_t src) {
       output_msg = print_config();
     }
   }
+  else if ( msg.startsWith(F("read")) ) {
+    if ( src == SRC_SMS ) {
+      output_msg = "command not found\n";
+    }
+    else {
+      read_config();
+      output_msg = F("OK");
+    }
+  }
   else if ( msg.startsWith(F("tinygsm_info")) ) {
     if ( src == SRC_SMS ) {
       output_msg = "command not found\n";
@@ -189,6 +198,8 @@ String print_config(){
   message += "apn_pass=" + apn_pass + " \n";
   message += "#BLYNK authentication key\n";
   message += "blynk_key=" + blynk_key + " \n";
+  message += "#BLYNK Server (optional)\n";
+  message += "blynk_server=" + blynk_server + " \n";
   message += "#SMS Keyword for authentication\n";
   message += "sms_keyword=" + sms_keyword + " \n";
   message += "#My Mobile Number for Notifications\n";

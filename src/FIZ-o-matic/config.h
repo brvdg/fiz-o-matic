@@ -39,7 +39,7 @@
 #define BLYNK_KEY "0123456789abcd"
 #endif
 
-#define MY_NUMBER "+4915141284285"
+#define MY_NUMBER "+491234567890"
 #define BLYNK_DEVICE_NAME "MyCar"
 
 // if this is turned on
@@ -172,6 +172,18 @@
 
 
 
+/*
+ * CAN Bus definations
+ */
+
+ #define CAN_time_MASTER
+ #define CAN_gps_MASTER
+ #define CAN_voltage_Master
+ #define CAN_rpm_Master
+ #define CAN_fuel_water_MASTER
+ #define CAN_oil_MASTER
+ #define CAN_klima_Master
+
 
 
 
@@ -200,6 +212,7 @@
 #define TinyGSM_ONLINE_TIMER 30000
 
 #define GPS_TIMER 1000 // 0,5s
+#define CANBUS_TIMER 1000 // 1s
 
 //#define TinyGSM_GPS_STATUS_TIMER 3000 // 3s
 //#define BLYNK_CHECK_TIMER 600000 // 10min

@@ -67,6 +67,11 @@ boolean parse_config_string(String inputString) {
     found = true;
     //message(INFO_MSG, (F("OK\n")));
   }
+  else if ( inputString.startsWith("blynk_server=") ) {
+    blynk_server=getValue( inputString, '=', 1 );
+    found = true;
+    //message(INFO_MSG, (F("OK\n")));
+  }
   else if ( inputString.startsWith("sms_keyword=") ) {
     sms_keyword=getValue( inputString, '=', 1 );
     found = true;
@@ -212,11 +217,14 @@ void read_config() {
 void save_config() {
   message(STORAGE, F("save configuration"));
   #ifdef SPIFLASH
+  message(STORAGE, F("to: SPIFLASH"));
   spiflash_save_config();
   #elif SDCARD
   sdcard_save_config();
+  message(STORAGE, F("to: SDCARD"));
   #else
   write_virtual_eeprom();
+  message(STORAGE, F("to: VIRTUAL EEPROM"));
   #endif
 }
 

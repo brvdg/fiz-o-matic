@@ -51,7 +51,7 @@ boolean debug = false;
 #define ALARM 10
 #define DEBUG_IO 16
 #define GPS 32
-#define TINYGSM 64
+#define TINYGSM_MSG 64
 #define BLYNK_MSG 68
 //#define DEBUG_ 32
 //#define TRACE_TINYGSM 64
@@ -228,6 +228,7 @@ String apn_pass = APN_PASS;
 String blynk_key = BLYNK_KEY;
 String my_number = MY_NUMBER;
 String sms_keyword = SMS_KEYWORD;
+String blynk_server = "";
 boolean online = false;
 boolean startmsg = true;
 byte online_intervall = ONLINE_INTERVALL;
@@ -334,6 +335,11 @@ int lastfile = 0;
 byte lastfile_config = 0;
 
 
+//CAN
+/*boolean can_active = false;
+int packetSize = 0;
+unsigned long canbus_timer = 0;
+byte can_buff[8];*/
 
 
 /*
@@ -623,6 +629,7 @@ typedef struct {
   char apn[36];
   char apn_user[12];
   char blynk_key[36];
+  char blynk_server[64];
   char sms_keyword[36];
   char my_number[16];
 } struckt_char_config;

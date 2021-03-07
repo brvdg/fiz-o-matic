@@ -14,26 +14,26 @@ void tinygsm_sms() {
 
   char sender[18];
 
-  message(TINYGSM, F("Read SMS"));
+  message(TINYGSM_MSG, F("Read SMS"));
   for (int i = 1; i < numofsms + 1; i++) {
-    message(TINYGSM, F("Read SMS# "));
-    message(TINYGSM, String(i, DEC));
+    message(TINYGSM_MSG, F("Read SMS# "));
+    message(TINYGSM_MSG, String(i, DEC));
     String smsmsg = readSMS(i, sender);
     smsmsg.toLowerCase();
     //    sender.replace('"', 0);
-    message(TINYGSM, F("#Sender: "));
-    message(TINYGSM, sender);
-    message(TINYGSM, F("Message: "));
-    message(TINYGSM, F("##############################"));
-    message(TINYGSM, smsmsg);
-    message(TINYGSM, F("##############################"));
+    message(TINYGSM_MSG, F("#Sender: "));
+    message(TINYGSM_MSG, sender);
+    message(TINYGSM_MSG, F("Message: "));
+    message(TINYGSM_MSG, F("##############################"));
+    message(TINYGSM_MSG, smsmsg);
+    message(TINYGSM_MSG, F("##############################"));
 
     // Check if keyword present
     if ( smsmsg.indexOf(sms_keyword) >= 0 ) {
-      message(TINYGSM, F("SMS Keyword is okay"));
+      message(TINYGSM_MSG, F("SMS Keyword is okay"));
       if ( smsmsg.indexOf(F("on")) >= 0 ) {
         go_online = true;
-        //message(TINYGSM,F("delete SMS"));
+        //message(TINYGSM_MSG,F("delete SMS"));
         //deleteSMS(i);
       }
       else if ( smsmsg.indexOf("off") >= 0 ) {
@@ -41,16 +41,16 @@ void tinygsm_sms() {
 
         if ( tinygsm_go_offline() ) {
           online = false;
-          //message(TINYGSM,F("delete SMS"));
+          //message(TINYGSM_MSG,F("delete SMS"));
           //deleteSMS(i);
-          message(TINYGSM,F("Disconnected"));
+          message(TINYGSM_MSG,F("Disconnected"));
         }
       }
       /*else if ( smsmsg.indexOf("status") >= 0 ) {
         //Watchdog.reset();
         modem.sendSMS(sender, F("I'm okay."));
         //Watchdog.reset();
-        //message(TINYGSM,F("delete SMS"));
+        //message(TINYGSM_MSG,F("delete SMS"));
         //deleteSMS(i);
       }*/
       else {
@@ -71,7 +71,7 @@ void tinygsm_sms() {
         }
 
 
-        //message(TINYGSM,F("delete SMS"));
+        //message(TINYGSM_MSG,F("delete SMS"));
         //deleteSMS(i);
       }
     }
@@ -79,7 +79,7 @@ void tinygsm_sms() {
       //modem.sendSMS(, return_msg);
     }
 
-    message(TINYGSM,F("delete SMS"));
+    message(TINYGSM_MSG,F("delete SMS"));
     deleteSMS(i);
 
   }

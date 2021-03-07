@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "20200601a"
+#define BUILD "20201031a"
 
 
 #include <stdarg.h>
@@ -17,6 +17,7 @@
 #include <avr/pgmspace.h>
 #include <avr/dtostrf.h>
 #include <Scheduler.h>
+#include <SPI.h>
 
 
 
@@ -25,13 +26,16 @@
 #include <FlashStorage.h>
 
 
+
 // include configuration file
 #include "config.h"
 #include "hardware.h"
 
-
+#include "vars_can.h"
 #include "tinygsm.h"
 #include "vars.h"
+
+#include "display.h"
 
 /*
  * RTC
@@ -40,9 +44,7 @@
 RTCZero rtc;
 //RTC_Millis rtc;
 
-#ifdef U8G2_DISPLAY
-#include <U8g2lib.h>
-#endif
+
 
 /*
  * Copy the .bin file to the SD card and rename
@@ -73,8 +75,10 @@ void TC4_Handler(){
 void setup() {
 
   #ifdef DEBUG
-  delay(5000);
+  delay(10000);
   #endif
+
+  SPI.beginTransaction(SPISettings(10000000, MSBFIRST, SPI_MODE0));
 
   //delay(3000);
 
@@ -101,9 +105,9 @@ void setup() {
 
   #endif
 
-  notify(BOOTMSG, F("#Booting..."));
-  notify(BOOTMSG, F(BUILD));
-  notify(BOOTMSG, F("\n"));
+  message(BOOTMSG, F("#Booting..."));
+  message(BOOTMSG, F(BUILD));
+  message(BOOTMSG, F("\n"));
   //delay(5000);
 
   /*
@@ -122,11 +126,11 @@ void setup() {
   /*
    * read config from FlashStorage
    */
-  notify(BOOTMSG, F("#READ FLASH"));
+  message(BOOTMSG, F("#READ Virtual EEPROM"));
   read_virtual_eeprom();
 
   // plausibility check for variables
-  notify(BOOTMSG, F("#check plausibility"));
+  message(BOOTMSG, F("#check plausibility"));
   check_plausibility();
 
   /*
@@ -142,7 +146,7 @@ void setup() {
     }
   }
   else {
-    notify(BOOTMSG, F("#SD is disabled"));
+    message(BOOTMSG, F("#SD is disabled"));
   }
 
   #ifdef HW_FEATHER_EXPRESS
@@ -151,7 +155,7 @@ void setup() {
   #endif
 
 
-  notify(BOOTMSG, F("#check plausibility"));
+  message(BOOTMSG, F("#check plausibility"));
   check_plausibility();
 
 
@@ -173,7 +177,7 @@ void setup() {
   update_port_value( 0xF6, 64 );
 
   //IO_init();
-
+  can_init();
   /*reg_port(0xC1);
   reg_port(0xC2);
   reg_port(0xC3);
@@ -211,13 +215,13 @@ void setup() {
 
 
   // internal Watchdog
-  notify(BOOTMSG, F("#Init Watchdog"));
+  message(BOOTMSG, F("#Init Watchdog"));
   //Watchdog.enable(4000);
 
   /*
    * enable Timer
    */
-  notify(BOOTMSG, F("#Init Timer"));
+  message(BOOTMSG, F("#Init Timer"));
   // set time for Software Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
 
@@ -327,6 +331,8 @@ void loop() {
   //display_loop();
 
   //status_checker();
+
+  can_loop();
 
   // Reset the watchdog with every loop to make sure the sketch keeps running.
   // If you comment out this call watch what happens after about 4 iterations!
