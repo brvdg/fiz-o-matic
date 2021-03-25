@@ -18,11 +18,12 @@
 void u8g2_init(void) {
     u8g2.begin();
     display_logo();
+    display_draw();
 }
 
 void display_logo() {
   u8g2.drawXBM(LOGO_Xpos, LOGO_Ypos, LOGO_width, LOGO_height, logo);
-  u8g2_update();
+  //u8g2_update();
 }
 
 void display_draw() {
@@ -33,7 +34,7 @@ void u8g2_update(void) {
   u8g2.sendBuffer();					// transfer internal memory to the display
 }
 
-bool display_pwrsave() {
+/*bool display_pwrsave() {
   #if defined OLED || defined OLED_FULL || defined DSP_PWRSAVE
     if ( ( display_active_timer > millis() ) || ( engine_running ) ) {
       u8g2.setPowerSave(false);
@@ -46,6 +47,11 @@ bool display_pwrsave() {
     }
   #endif
   return false;
+}*/
+
+void display_pwrsave(bool pwrsave) {
+  u8g2.setPowerSave(pwrsave);
+  u8g2.sendBuffer();					// transfer internal memory to the display
 }
 
 void clear_screen() {
@@ -61,7 +67,7 @@ void display_blink(bool blink) {
 
 void menu_notify() {
 
-  switch ( info_type ) {
+  /*switch ( info_type ) {
     case 1:
       //bootmsg1 = F("INFO");
       u8g2.drawXBM(Xpos + 5, Ypos, sign_info_width, sign_info_height, sign_info);
@@ -70,7 +76,10 @@ void menu_notify() {
       //bootmsg1 = F("ERROR");
       u8g2.drawXBM(Xpos + 5, Ypos+10, sign_info_width, sign_info_height, sign_info);
       break;
-  }
+  }*/
+
+
+  u8g2.drawXBM(Xpos+5, Ypos+5, sign_info_width, sign_info_height, sign_info);
 
   u8g2.setFontPosTop();
   u8g2.setFont(medium_font);
@@ -78,7 +87,8 @@ void menu_notify() {
   //u8g2.print(bootmsg1);
   u8g2.setCursor(Xpos + 24, Ypos + 10);
   u8g2.setFont(medium_font);
-  u8g2.print(info_text);
+  u8g2.print(display_message);
+  //u8g2.print(info_text);
   //u8g2.setCursor(Xpos, Ypos + 16);
   //u8g2.print(bootmsg3);
 
@@ -127,31 +137,22 @@ void bootscreen() {
  * simple clock with date
  */
 void menu_clock() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(big_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT1_1_X, LAYOUT1_1_Y);
   sprintf(buf, "%02d:%02d", hour, minute);
   u8g2.print(buf);
 
-  if ( (display_temp) and (temp_out_port != 0) ){
-    u8g2.setFont(medium_font);
-    u8g2.setFontPosTop();
-    u8g2.setCursor(LAYOUT1_2_X + 25, LAYOUT1_2_Y);
-    int m = (temp_out - ( (int) temp_out ))*10;
-    sprintf (buf, "%02d.%1d", (int)temp_out, m);
-    u8g2.print(buf);
-    //u8g2.print(temp_out, 1);
-    u8g2.print(F("\xb0"));
-    u8g2.print(F("C"));
-  }
-  else {
-    u8g2.setFont(medium_font);
-    u8g2.setFontPosTop();
-    u8g2.setCursor(LAYOUT1_2_X + 10, LAYOUT1_2_Y);
-    sprintf(buf, "%02d.%02d.%04d", day, month, year);
-    u8g2.print(buf);
-  }
+  u8g2.setFont(medium_font);
+  u8g2.setFontPosTop();
+  u8g2.setCursor(LAYOUT1_2_X + 25, LAYOUT1_2_Y);
+  int m = (temp_out - ( (int) temp_out ))*10;
+  sprintf (buf, "%02d.%1d", (int)temp_out, m);
+  u8g2.print(buf);
+  //u8g2.print(temp_out, 1);
+  u8g2.print(F("\xb0"));
+  u8g2.print(F("C"));
 
   switch (button_1) {
     case 1: MainMenuPos++; break;
@@ -169,7 +170,7 @@ void menu_clock() {
  * SPEED
  */
 void menu_speed() {
-  clear_screen();
+  //clear_screen();
   if ( !engine_running) {
     MainMenuPos++;
   }
@@ -216,7 +217,7 @@ void menu_speed() {
  * GPS informations
  */
 void menu_gpsinfo() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT5_1_X, LAYOUT5_1_Y);
@@ -247,7 +248,7 @@ void menu_gpsinfo() {
 }
 
 void menu_gpsinfo2() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(Xpos, Ypos);
@@ -272,7 +273,7 @@ void menu_gpsinfo2() {
  * distance, speed (avg, max), triptime
  */
 void menu_trip() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT4_1_X, LAYOUT4_1_Y);
@@ -360,7 +361,7 @@ void menu_trip() {
  */
 void menu_clima() {
   int m = 0;
-  clear_screen();
+  //clear_screen();
   if ( temp_out_port == 0 ) {
     MainMenuPos++;
 
@@ -422,7 +423,7 @@ void menu_clima() {
  * Dynamic Menu for all define values
  */
 void menu_values() {
-  clear_screen();
+  //clear_screen();
   if (( *values[MenuValuesPos].port == 0 ) || ( !values[MenuValuesPos].show )) {
     if (MenuValuesPos+1 >= (sizeof(values) / sizeof(values[0])) ) {
       MainMenuPos++;
@@ -475,12 +476,13 @@ void menu_values() {
     u8g2.print(values[MenuValuesPos].suffix);
 
     if ( next() ) {
+      clear_screen();
       if (MenuValuesPos+1 >= (sizeof(values) / sizeof(values[0])) ) {
         MainMenuPos++;
         MenuValuesPos = 0;
       } else {
         MenuValuesPos++;
-        clear_screen();
+        //clear_screen();
       }
     }
 
@@ -503,7 +505,7 @@ void menu_values() {
  * Info Menu
  */
 void menu_info() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT5_1_X, LAYOUT5_1_Y);
@@ -607,7 +609,7 @@ void menu_optionen() {
  * Dynamic Menu for config parameters
  */
 void menu_opt_config() {
-  clear_screen();
+  //clear_screen();
   if ( config[MenuConfigPos].steps == 0 ) {
     if (MenuConfigPos+1 >= (sizeof(config) / sizeof(config[0])) ) {
       MainMenuPos++;
@@ -669,7 +671,7 @@ void menu_opt_config() {
 }
 
 void menu_opt_features() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT4_1_X, LAYOUT4_1_Y);
@@ -729,7 +731,7 @@ void menu_opt_features() {
 }
 
 void menu_opt_ports() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(LAYOUT4_1_X, LAYOUT4_1_Y);
@@ -794,7 +796,7 @@ void menu_opt_ports() {
 
 
 void menu_save_config() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(Xpos, Ypos);
@@ -837,7 +839,7 @@ void menu_save_config() {
 }
 
 void menu_debug_ports() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(Xpos, Ypos);
@@ -865,7 +867,7 @@ void menu_debug_ports() {
 }
 
 void menu_debug_ports_2() {
-  clear_screen();
+  //clear_screen();
   u8g2.setFont(small_font);
   u8g2.setFontPosTop();
   u8g2.setCursor(Xpos, Ypos);

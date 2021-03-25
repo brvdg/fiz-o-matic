@@ -67,8 +67,17 @@ boolean parse_config_string(String inputString) {
     found = true;
     //message(INFO_MSG, (F("OK\n")));
   }
+  else if ( inputString.startsWith("blynk_server=") ) {
+    blynk_server=getValue( inputString, '=', 1 );
+    found = true;
+    //message(INFO_MSG, (F("OK\n")));
+  }
   else if ( inputString.startsWith("sms_keyword=") ) {
     sms_keyword=getValue( inputString, '=', 1 );
+    found = true;
+  }
+  else if ( inputString.startsWith("my_number=") ) {
+    my_number=getValue( inputString, '=', 1 );
     found = true;
   }
   else {
@@ -134,15 +143,19 @@ int StrToInt(String str)
 }
 
 
-void check_plausibility() {
+String check_plausibility() {
+
+  String msg = "";
 
   if ( tinygsm_enabled ) {
     if ( blynk_key.equals(BLYNK_KEY) ) {
-      message( ERROR, F("blynk_key is not set\n"));
+      //message( ERROR, F("blynk_key is not set\n"));
+      msg += "blynk_key is not set -> disable Blynk\n";
       blynk_enabled = false;
     }
     if ( blynk_key.length() < 16) {
-      message( ERROR, F("blynk_key valid\n"));
+      //message( ERROR, F("blynk_key invalid -> disable Blynk\n"));
+      msg += "blynk_key invalid -> disable Blynk\n";
       blynk_enabled = false;
     }
   }
@@ -163,12 +176,14 @@ void check_plausibility() {
     for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
       if ( *ports[i].port == ONE_WIRE_BUS_PORT ) {
         message( ERROR, F("1Wire Port isn't free\n"));
+        //msg += "1Wire Port isn't free\n"
         onewire_enabled = false;
       }
     }
   }
 
 
+  return msg;
 }
 
 
@@ -202,153 +217,32 @@ void read_config() {
 void save_config() {
   message(STORAGE, F("save configuration"));
   #ifdef SPIFLASH
+  message(STORAGE, F("to: SPIFLASH"));
   spiflash_save_config();
   #elif SDCARD
   sdcard_save_config();
+  message(STORAGE, F("to: SDCARD"));
   #else
   write_virtual_eeprom();
+  message(STORAGE, F("to: VIRTUAL EEPROM"));
   #endif
 }
 
 
 
-/*
- * Read the virtual EEPROM
- */
-void read_virtual_eeprom() {
-
-  int addr = 0;
-
-  if (EEPROM.isValid()) {
-    message(INFO_MSG, F("#read EEPROM!\n"));
-
-    message(DEBUG_MSG, F("#config ->"));
-    for (int i=0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++) {
-      message(DEBUG_MSG, F(" "));
-      message(DEBUG_MSG, String(EEPROM.read(addr), DEC));
-
-      *config[i].config = EEPROM.read(addr);
-      addr++;
-    }
-
-    message (DEBUG_MSG, F("\n#ports ->"));
-    for (int i=0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++) {
-      message(DEBUG_MSG, F(" "));
-      message(DEBUG_MSG, String(EEPROM.read(addr), DEC));
-
-      *ports[i].port = EEPROM.read(addr);
-      addr++;
-    }
-
-    message (DEBUG_MSG, F("\n#features ->"));
-    for (int i=0; i <= (sizeof(features) / sizeof(features[0])) - 1; i++) {
-      message(DEBUG_MSG, F(" "));
-      message(DEBUG_MSG, String(EEPROM.read(addr), DEC));
-
-      if ( EEPROM.read(addr) == 1 ) {
-        *features[i].feature = true;
-      }
-      else {
-        *features[i].feature = false;
-      }
-      addr++;
-    }
-
-    message (DEBUG_MSG, F("\n"));
-
-
-
-    char_config = flash_char_config.read();
-
-    sim_pin = String(char_config.sim_pin);
-    apn = String(char_config.apn);
-    apn_user = String(char_config.apn_user);
-    apn_pass = String(char_config.apn_pass);
-    blynk_key = String(char_config.blynk_key);
-    sms_keyword = String(char_config.sms_keyword);
-
-    message (DEBUG_MSG, F("\n#sim_pin -> "));
-    message (DEBUG_MSG, char_config.sim_pin);
-    message (DEBUG_MSG, F("\n#apn -> "));
-    message (DEBUG_MSG, char_config.apn);
-    message (DEBUG_MSG, F("\n#apn_user -> "));
-    message (DEBUG_MSG, char_config.apn_user);
-    message (DEBUG_MSG, F("\n#apn_pass -> "));
-    message (DEBUG_MSG, char_config.apn_pass);
-    message (DEBUG_MSG, F("\n#blynk_key -> "));
-    message (DEBUG_MSG, char_config.blynk_key);
-    message (DEBUG_MSG, F("\n#sms_keyword -> "));
-    message (DEBUG_MSG, char_config.sms_keyword);
-    message (DEBUG_MSG, F("\n"));
-
-  } else {
-    notify(BOOTMSG, F("config flash is empty"));
-  }
-}
-
-
-/*
- * Write virtual EEPROM
- */
-void write_virtual_eeprom() {
-
-  int config_i = 0;
-  int port_i = 0;
-  int addr = 0;
-  message(INFO_MSG, F("#Writing config to virtual EEPROM\n"));
-  for (int i = 0; i <= (sizeof(config) / sizeof(config[0])) - 1; i++){
-    EEPROM.write(addr, *config[i].config);
-    config_i = i;
-    addr++;
-  }
-  config_i++;
-  for (int i = 0; i <= (sizeof(ports) / sizeof(ports[0])) - 1; i++){
-    EEPROM.write(addr, *ports[i].port);
-
-    port_i = i;
-    addr++;
-  }
-  port_i++;
-  for (int i = 0; i <= (sizeof(features) / sizeof(features[0])) - 1; i++){
-    if ( *features[i].feature ) {
-      EEPROM.write(addr, 1);
-    }
-    else {
-      EEPROM.write(addr, 0);
-    }
-    addr++;
-  }
-
-  char_config = flash_char_config.read();
-  sim_pin.toCharArray( char_config.sim_pin, 6);
-  apn.toCharArray( char_config.apn, 36);
-  apn_user.toCharArray( char_config.apn_user, 12);
-  apn_pass.toCharArray( char_config.apn_pass, 8);
-  blynk_key.toCharArray( char_config.blynk_key, 36);
-  sms_keyword.toCharArray( char_config.sms_keyword, 36);
-
-  flash_char_config.write(char_config);
-
-  EEPROM.commit();
-  message(INFO_MSG, F("#Done!\n"));
-  if ( EEPROM.isValid() ) {
-    message(INFO_MSG, F("#EEPROM is valid\n"));
-  }
-
-  read_virtual_eeprom();
-
-}
 
 /*
  * this function prints a notification message on serial and/or on the display
  * all messeages are printed. the type is only for a logo
  */
 void notify(byte type, String msg) {
+  message(ALARM, msg);
+
   if (bitRead(type,0)) {
     //DISPLAY_INFO
     info_type = 1;
     info_text = msg;
-    display_notify();
+    //display_notify();
     MsgTimer = millis() + 10000;
     display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
@@ -359,7 +253,7 @@ void notify(byte type, String msg) {
     //DISPLAY_WARNING
     info_type = 2;
     info_text = msg;
-    display_notify();
+    //display_notify();
     MsgTimer = millis() + 10000;
     display_active_timer = MsgTimer;
     //display_active_timer = MsgTimer;
@@ -381,10 +275,13 @@ void notify(byte type, String msg) {
     blynk_msg(msg);
   }
   if (bitRead(type,5)) {
+    go_online=true;
+    blynk_push_msg = msg;
     //BLYNK_PUSH
   }
   if (bitRead(type,6)) {
-    //SMS
+
+    tinygsm_send_sms(msg);
   }
   if (bitRead(type,7)) {
     //BOOTMSG
@@ -399,16 +296,7 @@ void notify(byte type, String msg) {
 }
 
 
-/*
-   check button state and debounce it
 
-   Funktions...
-   1 = short pressed
-   2 = long pressed
-   3 = long pressed release
-   4 = long pressed repeat
-   5 = double press?
-*/
 
 
 /*

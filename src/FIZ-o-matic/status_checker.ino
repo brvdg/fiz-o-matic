@@ -47,6 +47,7 @@ void status_checker() {
 
 void check_engine() {
   if (bord_voltage > 4) {
+    display_active_timer = millis() + 30000;
     if (!engine_running) {
 
       go_online = false;
@@ -105,7 +106,8 @@ void check_engine() {
 
       // check if light is still on
       if ( dimmer_V > 2 ) {
-        notify(DISPLAY_WARNING + SOUND_INFO, F("Licht noch an"));
+        //notify(DISPLAY_WARNING + SOUND_INFO, F("Licht noch an"));
+        display_message = F("Licht");
         set_alarm(150, 150, 3, true);
       }
 
@@ -143,10 +145,11 @@ void check_alarm_system() {
       /*if ( tinygsm_go_online() ) {
         online = true;
       }*/
-      go_online=true;
+      //go_online=true;
 
-      set_alarm(600, 200, 5, true);
-      tinygsm_alarm();
+      //set_alarm(600, 200, 5, true);
+      //tinygsm_sms_alarm();
+      notify(SMS + BLYNK_PUSH, "Engine started!!!");
 
       #ifdef U8G2_DISPLAY
       MainMenuPos = 1;
@@ -185,7 +188,7 @@ void check_geo_fence() {
           message(INFO_MSG, String(tmp, DEC));
           message(INFO_MSG, F(" m\n"));
           blynk_msg(String(tmp, DEC));
-          tinygsm_alarm();
+          tinygsm_sms_alarm();
         }
       }
       else {
@@ -212,7 +215,7 @@ void check_online() {
   //message(DEBUG_MSG, F("#check_online\n"));
 
   // online intervall
-  
+
 
   if ( !stay_online && !engine_running && !alarm_system_triggered && !geo_fence_alarm && ( display_active_timer < millis() ) ) {
     if ( online_intervalll_timer < millis() ) {
@@ -227,10 +230,10 @@ void check_online() {
   }
   else {
     if ( stay_online ) {
-      message(TRACE_MSG, F("#stay online (stay_online=true)\n"));
+      //message(TRACE_MSG, F("#stay online (stay_online=true)\n"));
     }
     else if ( engine_running ) {
-      message(TRACE_MSG, F("#stay offline (engine_running=true)\n"));
+      //message(TRACE_MSG, F("#stay offline (engine_running=true)\n"));
     }
     else if ( alarm_system_triggered ) {
       message(TRACE_MSG, F("#stay online (alarm_system_triggered=true)\n"));

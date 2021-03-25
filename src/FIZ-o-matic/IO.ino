@@ -32,16 +32,28 @@ int vw_temp [][2] PROGMEM = {  {1000, 20},
                         {26, 125}};
 
 
+int vw_fuel [][2] PROGMEM = {  {211, 2},
+                        {151, 7},
+                        {95, 12},
+                        {84, 17},
+                        {74, 22},
+                        {63, 27},
+                        {48, 32},
+                        {52, 37},
+                        {46, 41},
+                        {39, 46},
+                        {32, 51},
+                        {30, 57}};
 
 void IO_init() {
 
   #ifdef ALARM_OUT
-  /*pinMode(ALARM_PORT, OUTPUT);
+  pinMode(ALARM_PORT, OUTPUT);
 
-  digitalWrite(ALARM_PORT, HIGH);
-  delay(100);
+  /*digitalWrite(ALARM_PORT, HIGH);
+  delay(10000);
   digitalWrite(ALARM_PORT, LOW);
-  delay(100);*/
+  delay(10000);*/
   #endif //ALARM_OUT
 
 
@@ -96,9 +108,9 @@ void IO_init() {
   reg_port(0x07, TYPE_undef);
   #endif
 
-  #ifdef GPIO13
+  /*#ifdef GPIO13
   reg_port(0x08, TYPE_undef);
-  #endif
+  #endif*/
 
 
   #ifdef DISPLAY_BG_LED
@@ -133,6 +145,10 @@ void IO_loop() {
 
     get_bord_voltage();
 
+    batt1_voltage = get_port_value(batt1_voltage_port);
+    batt2_voltage = get_port_value(batt2_voltage_port);
+
+
     /**
     #ifdef DISPLAY_BG_LED
     dimmer();
@@ -163,13 +179,6 @@ void vw_water_temp() {
 
   val = get_port_value(water_temp_port);
 
-  /*switch (water_temp_port) {
-    case 1: val = a0_V; break;
-    case 2: val = a1_V; break;
-    case 3: val = a2_V; break;
-    case 4: val = a3_V; break;
-  }*/
-
   float ohm = SERIESRESISTOR * (val / (10 - val));
   water_temp_ohm = ohm;
 
@@ -185,13 +194,15 @@ void vw_water_temp() {
   }
   else {
     for (int i=0; i<array_size;i++) {
+      // find the 1st value in the array which is higher then the real value
       if (ohm > vw_temp[i][0] ) {
-        //temp = pgm_read_word_near(&vw_temp[i][1]);
-        //temp = pgm_read_word_near(&vw_temp[i-1][1]);
-
+        // get the difference from the array value and the real value
         float temp_ohm = pgm_read_word_near(&vw_temp[i-1][0]) - ohm;
+        // get the difference between two values in the array
         float ohm_diff = pgm_read_word_near(&vw_temp[i][0]) - pgm_read_word_near(&vw_temp[i-1][0]);
         float temp_diff = pgm_read_word_near(&vw_temp[i-1][1]) - pgm_read_word_near(&vw_temp[i][1]);
+
+        // calculate the real value to the real resistor value
         water_temp = int( pgm_read_word_near(&vw_temp[i][1]) + (temp_diff / ohm_diff ) * temp_ohm );
 
         i=sizeof(vw_temp)/sizeof(vw_temp[0]);
@@ -204,35 +215,57 @@ void vw_water_temp() {
 
 }
 
-void get_bord_voltage() {
-  //TRACE_PRINTLN(F("#bord_voltage()"));
-  /*switch (bord_voltage_port) {
-    case 1: bord_voltage = a0_V; break;
-    case 2: bord_voltage = a1_V; break;
-    case 3: bord_voltage = a2_V; break;
-    case 4: bord_voltage = a3_V; break;
-  }*/
+void get_fuel() {
+  float val=0;
+  float temp = 0;
 
-  bord_voltage = get_port_value(bord_voltage_port);
+  int array_size = sizeof(vw_fuel)/sizeof(vw_fuel[0]);
 
-  //TRACE_PRINT(F("#BORD VOLTAGE: "));
-  //TRACE_PRINTLN(bord_voltage);
+  fuel_l = 0;
 
-  /*if (bord_voltage > 4) {
-    if (!running) {
-      running = true;
-      start_engine();
-    }
+  fuel_V = get_port_value(fuel_port);
+
+  float ohm = FUEL_GAUGERESISTOR * (fuel_V  / (10 - fuel_V ));
+  fuel_ohm = ohm;
+
+  if ( ohm > vw_fuel[0][0] ) {
+    fuel_l = 0;
+  }
+  else if ( ohm < vw_fuel[array_size-1][0] ) {
+    fuel_l = 255;
   }
   else {
-    if (running) {
-      running = false;
-      stop_engine();
+    for (int i=0; i<array_size;i++) {
+      // find the 1st value in the array which is higher then the real value
+      if (ohm > vw_fuel[i][0] ) {
+        // get the difference from the array value and the real value
+        float temp_ohm = pgm_read_word_near(&vw_fuel[i-1][0]) - ohm;
+        // get the difference between two values in the array
+        float ohm_diff = pgm_read_word_near(&vw_fuel[i][0]) - pgm_read_word_near(&vw_fuel[i-1][0]);
+        float fuel_diff = pgm_read_word_near(&vw_fuel[i-1][1]) - pgm_read_word_near(&vw_fuel[i][1]);
+
+        // calculate the real value to the real resistor value
+        fuel_l = int( pgm_read_word_near(&vw_fuel[i][1]) + (fuel_diff / ohm_diff ) * temp_ohm );
+
+        i=sizeof(vw_fuel)/sizeof(vw_fuel[0]);
+      }
     }
-  }*/
+  }
+
+
+  //message(DEBUG_IO, String(fuel_ohm));
+  float fuel_pct =(fuel_ohm - FUEL_FULL) * 100 / (FUEL_EMPTY - FUEL_FULL);
+  fuel_pct = 100 - fuel_pct;
+  fuel_l = fuel_pct * FUEL_L / 100;
+  //fuel_l = fuel_pct;
+
+
 }
 
+void get_bord_voltage() {
+  bord_voltage = get_port_value(bord_voltage_port);
 
+}
 
 
 /*
@@ -324,7 +357,7 @@ void get_speed() {
 
 }
 
-void get_fuel() {
+/*void get_fuel() {
   fuel_V = get_port_value(fuel_port);
 
 
@@ -338,4 +371,4 @@ void get_fuel() {
   //fuel_l = fuel_pct;
 
 
-}
+}*/

@@ -71,6 +71,9 @@ void display_loop() {
   day = rtc.getDay();
   month = rtc.getMonth();
   year = rtc.getYear() + 2000;
+
+  static boolean display_message_active = false;
+
   yield();
 
   if ( display_update_timer_lock ) return;
@@ -78,19 +81,49 @@ void display_loop() {
   display_update_timer_lock = true;
 
   if ( online || go_online ) {
-    //Serial.println("clear_screen");
-    clear_screen();
-    //Serial.println("display_logo");
-    display_logo();
+    if ( OldPos != 0 ) {
+      message(U8G2_MSG, F("CLEAR SCREEN"));
+
+      clear_screen();
+      display_logo();
+      display_draw();
+
+      OldPos = 0;
+    }
+
     display_update_timer_lock = false;
     yield();
     return;
   }
 
 
+  // Display a message
+  if ( display_message.length() > 1 ) {
+    clear_screen();
+    menu_notify();
+    if ( millis() > MsgTimer ) {
+      if ( !display_message_active ) {
+        MsgTimer = millis() + 10000;
+        display_message_active = true;
+      }
+      else {
+        display_message = "";
+        display_message_active = false;
+      }
+    }
+
+    display_draw();
+    display_update_timer_lock = false;
+    yield();
+    return;
+  }
+
+
+
+
+
   if ( MainMenuPos >= 100 ) {
     menu_pos = MainMenuPos;
-    //Serial.println(menu_pos, DEC);
   }
   else {
     if (engine_running) {
@@ -105,12 +138,11 @@ void display_loop() {
     }
   }
 
-  //Serial.println("MENÜ");
-  //Serial.println(menu_pos, DEC);
-  //Serial.println(MainMenuPos, DEC);
 
   if ( OldPos != menu_pos ) {
+    message(U8G2_MSG, F("CLEAR SCREEN"));
     clear_screen();
+
     OldPos = menu_pos;
   }
 
@@ -170,7 +202,7 @@ void display_loop() {
   display_update_timer_lock = false;
 }
 
-void display_loop2() {
+/*void display_loop2() {
 
   //if ( !timer_check(&display_update_timer, U8G2_DISPLAY_UPDATE_TIMER) ) return;
 
@@ -283,7 +315,7 @@ void display_loop2() {
   }
   //delay(U8G2_DISPLAY_UPDATE_TIMER);
   yield();
-}
+}*/
 
 /*void display_update(void) {
 
@@ -366,13 +398,20 @@ void dimmer() {
     analogWrite(DISPLAY_BG_LED, dimmer_val);
   }**/
 
+#elif defined DSP_PWRSAVE
+  if ( display_active_timer > millis() ) {
+    display_pwrsave(false);
+  }
+  else {
+    display_pwrsave(true);
+  }
 #endif
 }
 
 
 
 
-void display_notify() {
+/*void display_notify() {
   //Serial.println("NOTIFY DISPLAY");
 
   if ( !(NotifyActive) && !(ignore_notify) ){
@@ -392,7 +431,7 @@ void display_notify() {
   }
 
   //display_update();
-}
+}*/
 
 
 /**void display_bootmsg(String msg) {
