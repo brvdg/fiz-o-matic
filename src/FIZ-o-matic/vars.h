@@ -112,7 +112,7 @@ int ds18b20_temp = -127;
 
 
 // Voltage
-float bord_voltage = 0;
+//float bord_voltage = 0;
 //float bord_voltage_blynk = 0;
 byte bord_voltage_port = BORD_VOLTAGE_PORT;
 
@@ -124,9 +124,9 @@ byte dimmer_min = 0;
 byte dimmer_max = 10;
 byte display_active = 5;
 //unsigned long display_active_timer = 0;
-float batt1_voltage = 0;
+//float batt1_voltage = 0;
 byte batt1_voltage_port = 0x00;
-float batt2_voltage = 0;
+//float batt2_voltage = 0;
 byte batt2_voltage_port = 0x00;
 
 

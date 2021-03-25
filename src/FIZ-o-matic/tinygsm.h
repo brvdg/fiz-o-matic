@@ -24,7 +24,19 @@ int gsm_signal = 0;
 
 boolean use_gps_speed = USE_GPS_SPEED;
 
-#define CANMASTER_gps
+#if defined CAN_gps_SLAVE || defined CAN_gps_MASTER
+#else
+float gps_latitude = 0;
+long gps_latitude_long = 0;
+float gps_longitude = 0;
+long gps_longitude_long = 0;
+int gps_speed;
+short gps_altitude;
+int gps_view_satellites;
+int gps_used_satellites;
+#endif
+
+/*#define CANMASTER_gps
 #define CANADDR_gps_lat_long 0xA2
 #define CANBYTE_gps_latitude 0
 float gps_latitude = 0;
@@ -43,7 +55,7 @@ int gps_view_satellites;
 #define CANBYTE_gps_used_satellites 5
 int gps_used_satellites;
 #define CANBYTE_gps_fix 6
-boolean gps_fix = false;
+boolean gps_fix = false;*/
 
 boolean gps_fixstatus;
 int gps_fixerrcnt = 0;

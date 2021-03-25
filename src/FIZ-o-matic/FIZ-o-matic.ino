@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "20201031a"
+#define BUILD "20210309a"
 
 
 #include <stdarg.h>
@@ -30,7 +30,6 @@
 // include configuration file
 #include "config.h"
 #include "hardware.h"
-
 #include "vars_can.h"
 #include "tinygsm.h"
 #include "vars.h"
