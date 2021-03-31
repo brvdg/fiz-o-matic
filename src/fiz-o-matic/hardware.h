@@ -8,7 +8,10 @@
  * License: Creative Common (CC BY-NC-SA 4.0)
  ****************************************************/
 
-
+/*
+#define OLED
+#define HW_FEATHER_EXPRESS
+*/
 
 
 #ifdef OLED

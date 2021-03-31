@@ -502,6 +502,17 @@ boolean tinygsm_go_online() {
   char tmp_blynk_key[blynk_key.length() + 1];
   blynk_key.toCharArray(tmp_blynk_key, blynk_key.length() + 1);
 
+  //if ( blynk_server.length() >= 6 ) {
+    blynk_server.trim();
+    char tmp_blynk_server[blynk_server.length() + 1];
+    blynk_server.toCharArray(tmp_blynk_server, blynk_server.length() + 1);
+
+    blynk_port.trim();
+    int tmp_blynk_port = blynk_port.toInt();
+
+  //}
+
+
   apn.trim();
   char tmp_apn[apn.length() + 1];
   apn.toCharArray(tmp_apn, apn.length() + 1);
@@ -538,8 +549,15 @@ boolean tinygsm_go_online() {
 
   message(TINYGSM_MSG, F("Blynk.begin... "));
   message(TINYGSM_MSG, F("If blynk_key isn't correct, it never comes back! \n"));
-  Blynk.begin(tmp_blynk_key, modem, tmp_apn, tmp_apn_user, tmp_apn_pass);
+
+  if ( blynk_server.length() >= 6 ) {
+    Blynk.begin(tmp_blynk_key, modem, tmp_apn, tmp_apn_user, tmp_apn_pass, tmp_blynk_server, tmp_blynk_port);
+  }
+  else {
+    Blynk.begin(tmp_blynk_key, modem, tmp_apn, tmp_apn_user, tmp_apn_pass);
+  }
   //Blynk.begin(BLYNK_KEY, modem, SIM_APN, SIM_USER, apn_pass);
+  //Blynk.begin(tmp_blynk_key, modem, tmp_apn, tmp_apn_user, tmp_apn_pass, server_address, server_port);
   message(TINYGSM_MSG, F("Blynk.begin finished \n"));
 
 

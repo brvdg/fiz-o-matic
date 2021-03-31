@@ -198,8 +198,10 @@ String print_config(){
   message += "apn_pass=" + apn_pass + " \n";
   message += "#BLYNK authentication key\n";
   message += "blynk_key=" + blynk_key + " \n";
-  message += "#BLYNK Server (optional)\n";
+  message += "#BLYNK Server Address (optional)\n";
   message += "blynk_server=" + blynk_server + " \n";
+  message += "#BLYNK Server Port (optional)\n";
+  message += "blynk_port=" + blynk_port + " \n";
   message += "#SMS Keyword for authentication\n";
   message += "sms_keyword=" + sms_keyword + " \n";
   message += "#My Mobile Number for Notifications\n";

@@ -387,9 +387,12 @@ void serial_print_config(){
   Serial.println(F("#BLYNK authentication key"));
   Serial.print(F("blynk_key="));
   Serial.println(blynk_key);
-  Serial.println(F("#BLYNK Server "));
+  Serial.println(F("#BLYNK Server Address "));
   Serial.print(F("blynk_server="));
   Serial.println(blynk_server);
+  Serial.println(F("#BLYNK Server Port"));
+  Serial.print(F("blynk_port="));
+  Serial.println(blynk_port);
   Serial.println(F("#SMS Keyword for authentication"));
   Serial.print(F("sms_keyword="));
   Serial.println(sms_keyword);

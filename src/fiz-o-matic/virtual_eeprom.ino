@@ -52,6 +52,7 @@ void read_virtual_eeprom() {
     apn_pass = String(char_config.apn_pass);
     blynk_key = String(char_config.blynk_key);
     blynk_server = String(char_config.blynk_server);
+    blynk_port = String(char_config.blynk_port);
     sms_keyword = String(char_config.sms_keyword);
     my_number = String(char_config.my_number);
 
@@ -68,6 +69,8 @@ void read_virtual_eeprom() {
     message (DEBUG_MSG, char_config.blynk_key);
     message (DEBUG_MSG, F("\n#blynk_server -> "));
     message (DEBUG_MSG, char_config.blynk_server);
+    message (DEBUG_MSG, F("\n#blynk_port -> "));
+    message (DEBUG_MSG, char_config.blynk_port);
     message (DEBUG_MSG, F("\n#sms_keyword -> "));
     message (DEBUG_MSG, char_config.sms_keyword);
     message (DEBUG_MSG, F("\n#my_number -> "));
@@ -119,6 +122,7 @@ void write_virtual_eeprom() {
   apn_pass.toCharArray( char_config.apn_pass, 8);
   blynk_key.toCharArray( char_config.blynk_key, 36);
   blynk_server.toCharArray( char_config.blynk_server, 64);
+  blynk_port.toCharArray( char_config.blynk_port, 8);
   sms_keyword.toCharArray( char_config.sms_keyword, 36);
   my_number.toCharArray( char_config.my_number, 16);
 

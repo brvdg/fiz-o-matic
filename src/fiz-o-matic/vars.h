@@ -229,6 +229,7 @@ String blynk_key = BLYNK_KEY;
 String my_number = MY_NUMBER;
 String sms_keyword = SMS_KEYWORD;
 String blynk_server = "";
+String blynk_port = "";
 boolean online = false;
 boolean startmsg = true;
 byte online_intervall = ONLINE_INTERVALL;
@@ -630,6 +631,7 @@ typedef struct {
   char apn_user[12];
   char blynk_key[36];
   char blynk_server[64];
+  char blynk_port[8];
   char sms_keyword[36];
   char my_number[16];
 } struckt_char_config;

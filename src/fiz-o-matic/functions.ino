@@ -72,6 +72,11 @@ boolean parse_config_string(String inputString) {
     found = true;
     //message(INFO_MSG, (F("OK\n")));
   }
+  else if ( inputString.startsWith("blynk_port=") ) {
+    blynk_port=getValue( inputString, '=', 1 );
+    found = true;
+    //message(INFO_MSG, (F("OK\n")));
+  }
   else if ( inputString.startsWith("sms_keyword=") ) {
     sms_keyword=getValue( inputString, '=', 1 );
     found = true;
