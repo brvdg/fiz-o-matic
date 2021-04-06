@@ -129,6 +129,12 @@ byte batt1_voltage_port = 0x00;
 //float batt2_voltage = 0;
 byte batt2_voltage_port = 0x00;
 
+#ifndef CANBUS
+float bord_voltage = 0;
+float batt1_voltage = 0;
+float batt2_voltage = 0;
+#endif
+
 
 
 
@@ -246,6 +252,19 @@ unsigned long online_intervalll_timer = 0;
 boolean blynk_alarm = false;
 
 boolean running = false;
+
+#ifndef CANBUS
+float gps_latitude = 0;
+long gps_latitude_long = 0;
+float gps_longitude = 0;
+long gps_longitude_long = 0;
+//float gps_altitude = 0;
+int gps_speed;
+short gps_altitude;
+int gps_view_satellites;
+int gps_used_satellites;
+boolean gps_fix = false;
+#endif
 
 
 // TIME

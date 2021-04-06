@@ -300,9 +300,10 @@ void menu_trip() {
   switch (button_1) {
     case 1: MainMenuPos++; break;
     case 2:
-      gps_distance_trip = 0;
+      //gps_distance_trip = 0;
       gps_speed_max_trip = 0;
       engine_running_total = 0;
+      trip_distance = 0;
       break;
   }
   button_1 = 0;
