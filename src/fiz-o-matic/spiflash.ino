@@ -134,6 +134,9 @@ void spiflash_save_config() {
       config_write.println(F("#BLYNK Server (optional)"));
       config_write.print(F("blynk_server="));
       config_write.println(blynk_server);
+      config_write.println(F("#BLYNK Server Port (optional)"));
+      config_write.print(F("blynk_port="));
+      config_write.println(blynk_port);
       config_write.println(F("#SMS Keyword for authentication"));
       config_write.print(F("sms_keyword="));
       config_write.println(sms_keyword);
