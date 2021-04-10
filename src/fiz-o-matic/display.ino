@@ -35,15 +35,15 @@ int running_menu[] = {0, MENU_speed, MENU_trip, MENU_values, MENU_clima};
 
 
 #ifdef DOGS102
-#include <display_u8g2_dogs102.h>
+#include "display_u8g2_dogs102.h"
 #endif
 
 #ifdef OLED
-#include <display_u8g2_OLED.h>
+#include "display_u8g2_OLED.h"
 #endif
 
 #ifdef OLEDFULL
-#include <display_u8g2_OLEDFULL.h>
+#include "display_u8g2_OLEDFULL.h"
 #endif
 
 // local variables
