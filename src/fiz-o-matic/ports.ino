@@ -2,8 +2,8 @@
  * Read the voltage of each Port
  * The Voltage is used in other functions to calculate diffrent values
  */
+
 void read_ports() {
-  //TRACE_PRINTLN(F("#read_ports("));
 
   float a0_sum = 0;
   float a1_sum = 0;
@@ -12,13 +12,6 @@ void read_ports() {
   float a4_sum = 0;
   float a5_sum = 0;
 
-
-  //a0_V = analogRead(A0) * A0_MULTIPLICATOR;
-  //a1_V = analogRead(A1) * A1_MULTIPLICATOR;
-  //a2_V = analogRead(A2) * A2_MULTIPLICATOR;
-  //a3_V = analogRead(A3) * A3_MULTIPLICATOR;
-
-  //message(DEBUG_IO, F("#Ports: "));
 
   // for port A0 on address 0x01
   #ifdef A0_MULTIPLICATOR
@@ -32,10 +25,6 @@ void read_ports() {
   a0_V = a0_sum / IO_ARRAY;
 
   update_port_value( 0x01, analogRead(A0) * A0_MULTIPLICATOR);
-
-  //message(DEBUG_IO, String(a0_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
   #ifdef A1_MULTIPLICATOR
@@ -51,10 +40,6 @@ void read_ports() {
 
   update_port_value( 0x02, analogRead(A1) * A1_MULTIPLICATOR);
   a1_V = analogRead(A1) * A1_MULTIPLICATOR;
-
-  //message(DEBUG_IO, String(a1_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
   #ifdef A2_MULTIPLICATOR
@@ -69,10 +54,6 @@ void read_ports() {
   a2_V = a2_sum / IO_ARRAY;
 
   update_port_value( 0x03, analogRead(A2) * A2_MULTIPLICATOR);
-
-  //message(DEBUG_IO, String(a2_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
   #ifdef A3_MULTIPLICATOR
@@ -87,10 +68,6 @@ void read_ports() {
   a3_V = a3_sum / IO_ARRAY;
 
   update_port_value( 0x04, analogRead(A3) * A3_MULTIPLICATOR);
-
-  //message(DEBUG_IO, String(a3_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
   #ifdef A4_MULTIPLICATOR
@@ -105,10 +82,6 @@ void read_ports() {
   a4_V = a4_sum / IO_ARRAY;
 
   update_port_value( 0x05, analogRead(A4) * A4_MULTIPLICATOR);
-
-  //message(DEBUG_IO, String(a4_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
   #ifdef A5_MULTIPLICATOR
@@ -123,40 +96,28 @@ void read_ports() {
   a5_V = a5_sum / IO_ARRAY;
 
   update_port_value( 0x06, analogRead(A5) * A5_MULTIPLICATOR);
-
-  //message(DEBUG_IO, String(a5_V));
-  //message(DEBUG_IO, F(" V, "));
-
   #endif
 
 
   // updatin print_port_values
   #ifdef A4_COUNTER
   update_port_value(0x05, a4_hz);
-  //message(DEBUG_IO, String(a4_hz));
-  //message(DEBUG_IO, F(" Hz, "));
   #endif
 
   #ifdef A5_COUNTER
   update_port_value(0x06, a5_hz);
-  //message(DEBUG_IO, String(a5_hz));
-  //message(DEBUG_IO, F(" Hz\n"));
   #endif
 
 
   #ifdef GPIO13
-  //Serial.print("#GPIO13");
   for (int i = 0; i <= (sizeof(port_values) / sizeof(port_values[0])) - 1; i++) {
     if ( port_values[i].port == 0x08 ) {
       if ( port_values[i].output ) {
-        //Serial.println("#GPIO13 is anoutput port");
         if ( port_values[i].value != 0 ) {
-          //Serial.println("#13 on");
           digitalWrite(13, HIGH);
         }
         else {
           digitalWrite(13, LOW);
-          //Serial.println("#13 off");
         }
       }
       break;
@@ -231,18 +192,11 @@ void reg_port(byte port_address, byte type) {
       port_values[i].type = type;
       port_values[i].output = false;
 
-
-      //message(INFO_MSG, F("Slot: "));
-      //message(INFO_MSG, String(i, DEC));
       String msg = F("register device 0x");
-      //message(INFO_MSG ,F("#register device 0x"));
       if (port_address<16) {
-        //message(INFO_MSG ,"0");
         msg += F("0");
       }
       msg += String(port_values[i].port, HEX);
-      //message(INFO_MSG , String(port_values[i].port, HEX));
-      //message(INFO_MSG , F("\n"));
       message(INFO_MSG , msg);
       break;
     }

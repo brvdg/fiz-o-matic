@@ -209,9 +209,9 @@ float get_distance(float latitude1, float longitude1, float latitude2, float lon
 void read_config() {
   message(STORAGE, F("read configuration"));
 
-  #ifdef SPIFLASH
+  #if defined SPIFLASH
   spiflash_open_config();
-  #elif SDCARD
+  #elif defined SDCARD
   sdcard_open_config();
   #else
   read_virtual_eeprom();
@@ -221,10 +221,10 @@ void read_config() {
 
 void save_config() {
   message(STORAGE, F("save configuration"));
-  #ifdef SPIFLASH
+  #if defined SPIFLASH
   message(STORAGE, F("to: SPIFLASH"));
   spiflash_save_config();
-  #elif SDCARD
+  #elif defined SDCARD
   sdcard_save_config();
   message(STORAGE, F("to: SDCARD"));
   #else

@@ -1,4 +1,11 @@
 /*
+ * 210506a
+ * - a little bit cleanup
+ * - smoother fule calculation
+ *
+ * 210406a
+ * - add Modules for future CAN Bus
+ *
  * 200214a
  * - Bug fixing
  *

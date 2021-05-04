@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "20210406a"
+#define BUILD "210506a"
 
 
 #include <stdarg.h>
@@ -32,6 +32,7 @@
 #include "hardware.h"
 #include "vars_can.h"
 #include "tinygsm.h"
+#include "blynk.h"
 #include "vars.h"
 
 #include "display.h"
@@ -177,11 +178,7 @@ void setup() {
 
   //IO_init();
   can_init();
-  /*reg_port(0xC1);
-  reg_port(0xC2);
-  reg_port(0xC3);
-  reg_port(0xC4);
-  reg_port(0xC5);*/
+
 
 
   /*
@@ -327,10 +324,6 @@ void loop() {
 
   tinygps_loop();
 
-  //display_loop();
-
-  //status_checker();
-
   can_loop();
 
   // Reset the watchdog with every loop to make sure the sketch keeps running.
@@ -366,15 +359,13 @@ void loop() {
   // Status Checker
   status_checker();
 
-
   #ifdef FeatherLED8
   digitalWrite(FeatherLED8, LOW);
   #endif FeatherLED8
 
-
   onewire_loop();
   i2c_loop();
-  //update_vars();
+
 
   // calculating trip informations
   trip();
@@ -385,11 +376,6 @@ void loop() {
 
   // get the Port values
   IO_loop();
-
-  //display_loop();
-
-  // Button...
-  //button();
 
   // at least custom functions
   #ifdef CUSTOM

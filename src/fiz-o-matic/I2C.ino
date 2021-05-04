@@ -54,7 +54,7 @@ double si7021_humidity;
 
 void i2c_init() {
   //TRACE_PRINTLN(F("#i2c_init"));
-  message(BOOTMSG, F("#Init I2C"));
+  message(I2C_MSG, F("#Init I2C"));
 
 
   byte error, address;
@@ -77,27 +77,27 @@ void i2c_init() {
 
     if (error == 0)
     {
-      message(INFO_MSG ,F("#I2C device found at address 0x"));
+      message(I2C_MSG ,F("#I2C device found at address 0x"));
       if (address<16) {
-        message(INFO_MSG ,"0");
+        message(I2C_MSG ,"0");
       }
-      message(INFO_MSG ,String(address, HEX));
-      message(INFO_MSG ,F("  !\n"));
+      message(I2C_MSG ,String(address, HEX));
+      message(I2C_MSG ,F("  !\n"));
 
       switch(address) {
         case 0x40:
         //case 76:
           si7021_available = true;
           //INFO_PRINTLN(F("#SI7021 found!"));
-          notify(BOOTMSG, F("SI7021 found"));
+          message(I2C_MSG, F("SI7021 found"));
           reg_port(0x69, TYPE_GradCelsius);
           reg_port(0x6A, TYPE_Humidity);
           //delay(2000);
           break;
         case 0x70:
           /*ht16k33_available = true;
-          message(INFO_MSG ,F("#HT16K33 found!\n"));
-          notify(BOOTMSG, F("HT16K33 (#1) found"));
+          message(I2C_MSG ,F("#HT16K33 found!\n"));
+          message(I2C_MSG, F("HT16K33 (#1) found"));
 
           alpha4.begin(0x70);  // pass in the address
           alpha4.writeDigitRaw(3, 0x0);
@@ -124,7 +124,7 @@ void i2c_init() {
           //delay(2000);
           break;*/
         case 0x48:
-          /*notify(BOOTMSG, F("ADS1x15 found"));
+          /*message(I2C_MSG, F("ADS1x15 found"));
           reg_port(0x80, TYPE_Volt);
           reg_port(0x81, TYPE_Volt);
           //reg_port(0x82, TYPE_Volt);
@@ -135,7 +135,7 @@ void i2c_init() {
           ads_0.setGain(GAIN_ONE);
           break;*/
         case 0x49:
-          /*notify(BOOTMSG, F("ADS1x15 found"));
+          /*message(I2C_MSG, F("ADS1x15 found"));
           reg_port(0x84, TYPE_Volt);
           reg_port(0x85, TYPE_Volt);
           reg_port(0x86, TYPE_Volt);
@@ -145,7 +145,7 @@ void i2c_init() {
           ads_1.begin();
           break;*/
         case 0x4A:
-          /*notify(BOOTMSG, F("ADS1x15 found"));
+          /*message(I2C_MSG, F("ADS1x15 found"));
           reg_port(0x88, TYPE_Volt);
           reg_port(0x89, TYPE_Volt);
           reg_port(0x8A, TYPE_Volt);
@@ -156,7 +156,7 @@ void i2c_init() {
           break;*/
 
         case 0x4B:
-          /*notify(BOOTMSG, F("ADS1x15 found"));
+          /*message(I2C_MSG, F("ADS1x15 found"));
           reg_port(0x8C, TYPE_Volt);
           reg_port(0x8D, TYPE_Volt);
           reg_port(0x8E, TYPE_Volt);
@@ -168,25 +168,25 @@ void i2c_init() {
 
         case 0x76:
           bmp280_available = true;
-          notify(BOOTMSG, F("BMP280 found"));
+          message(I2C_MSG, F("BMP280 found"));
           break;
         /*case 0x49:
           lm75_1_available = true;
           //INFO_PRINTLN(F("#LM75 (#1) found!"));
-          notify(BOOTMSG, F("LM75 (#1) found"));
+          message(I2C_MSG, F("LM75 (#1) found"));
           reg_port(0x60, TYPE_GradCelsius);
           //delay(2000);
           break;*/
         /*case 0x4A:
           lm75_2_available = true;
           //INFO_PRINTLN(F("#LM75 (#2) found!"));
-          notify(BOOTMSG, F("LM75 (#2) found"));
+          message(I2C_MSG, F("LM75 (#2) found"));
           reg_port(0x61, TYPE_GradCelsius);
           //delay(2000);
           break;*/
         case 0x50:
           //case 76:
-          notify(BOOTMSG, F("EEPROM found"));
+          message(I2C_MSG, F("EEPROM found"));
           break;
       }
 
@@ -195,12 +195,12 @@ void i2c_init() {
     }
     else if (error==4)
     {
-      message(INFO_MSG ,F("#Unknow error at address 0x"));
+      message(I2C_MSG ,F("#Unknow error at address 0x"));
       if (address<16) {
-        message(INFO_MSG ,"0");
+        message(I2C_MSG ,"0");
       }
-      message(INFO_MSG ,String(address, HEX));
-      message(INFO_MSG ,F("  !\n"));
+      message(I2C_MSG ,String(address, HEX));
+      message(I2C_MSG ,F("  !\n"));
     }
   }
 

@@ -36,28 +36,6 @@ void alarm_loop() {
   }
 }
 
-/*void make_alarm() {
-
-
-  if (alarm = 1 ) {
-    //digitalWrite(ALARM_PORT, HIGH);
-    //delay(25);
-    //digitalWrite(ALARM_PORT, LOW);
-    //delay(5000);
-
-    if ( alarm_on_timer > millis() ) {
-      digitalWrite(ALARM_PORT, HIGH);
-    }
-    else if ( alarm_off_timer > millis() ) {
-      digitalWrite(ALARM_PORT, LOW);
-    }
-    else {
-
-      alarm_on_timer = millis() + alarm_on;
-      alarm_off_timer = alarm_on_timer + alarm_pause;
-    }
-  }
-}*/
 
 void set_alarm(int on, int pause, int count, boolean blink) {
   alarm_counter = count;

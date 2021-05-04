@@ -9,11 +9,17 @@
  ****************************************************/
 
 /*
+ * Definition of the used hardware
+ */
+
+/*
 #define OLED
 #define HW_FEATHER_EXPRESS
 */
 
-
+/*
+ * Display SPI Settings
+ */
 #ifdef OLED
 #define ENABLE_DISPLAY
 #define U8G2_DISPLAY
@@ -47,14 +53,6 @@
 #define DISPLAY_DC 12
 //#define DISPLAY_RST 11
 #define DISPLAY_ON 10
-#endif
-
-#if defined TOUCHBUTTON
-#define BUTTON_PRESSED HIGH
-bool no_long_press = true;
-#else
-#define BUTTON_PRESSED LOW
-bool no_long_press = false;
 #endif
 
 
@@ -110,13 +108,13 @@ bool no_long_press = false;
 
 
 /*
- * fiz-o-matic 0.8 with Adafruit Feather
+ * fiz-o-matic 0.8 with Adafruit Feather Logger with SD Card
  */
 #if defined HW_FEATHER
 #define TinyGSM
 // enable SD card
-//#define SDCARD
-//#define SD_CS 4
+#define SDCARD
+#define SD_CS 4
 #define SDU
 
 // LED on Feather board for running status
@@ -154,6 +152,16 @@ bool no_long_press = false;
 #endif //HW_FEATHER
 
 
+/*
+ * If a touch button is used define it
+ */
+#if defined TOUCHBUTTON
+#define BUTTON_PRESSED HIGH
+bool no_long_press = true;
+#else
+#define BUTTON_PRESSED LOW
+bool no_long_press = false;
+#endif
 
 
 

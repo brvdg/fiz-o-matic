@@ -57,6 +57,7 @@ boolean debug = false;
 //#define TRACE_TINYGSM 64
 #define TRACE_MSG 128
 #define U8G2_MSG 132
+#define I2C_MSG 134
 
 
 /*
@@ -141,6 +142,7 @@ float batt2_voltage = 0;
 // Fuel
 float fuel_V = 0;
 float fuel_l = 43.8;
+float fuel_array[IO_ARRAY];
 float fuel_ohm = 0;
 byte fuel_port = FUEL_GAUGE_PORT;
 int fuel_gaugeresistor = FUEL_GAUGERESISTOR;

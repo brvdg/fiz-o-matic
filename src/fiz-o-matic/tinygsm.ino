@@ -53,9 +53,6 @@ byte i = 0;
 
 
 
-
-
-
 void tinygsm_init()
 {
   // Module baud rate

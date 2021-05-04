@@ -1,6 +1,8 @@
 /*
  * TINYGSM library
  */
+
+
 unsigned long tinygsm_timer = 0;
 unsigned long gps_timer = 0;
 unsigned long tinygsm_sms_timer = 0;
@@ -104,7 +106,7 @@ boolean gprs_tracking = false;
   #define BLYNK_DEBUG        // Optional, this enables more detailed prints
 #endif
 
-//#define TINY_GSM_YIELD() { delay(10); yield(); }
+#define TINY_GSM_YIELD() { delay(10); yield(); }
 
 // Select your modem:
 //#define TINY_GSM_MODEM_SIM800

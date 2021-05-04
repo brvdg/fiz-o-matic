@@ -50,27 +50,9 @@ void IO_init() {
   #ifdef ALARM_OUT
   pinMode(ALARM_PORT, OUTPUT);
 
-  /*digitalWrite(ALARM_PORT, HIGH);
-  delay(10000);
-  digitalWrite(ALARM_PORT, LOW);
-  delay(10000);*/
   #endif //ALARM_OUT
 
 
-  //pinMode(A0,INPUT_PULLUP)
-  /*digitalWrite(A0, HIGH);
-  digitalWrite(A1, HIGH);
-  digitalWrite(A2, HIGH);
-  digitalWrite(A3, HIGH);*/
-
-  /*#if defined HW_FEATHER
-  pinMode(A4, INPUT);           // set pin to input
-  pinMode(A5, INPUT);           // set pin to input
-  digitalWrite(A4, HIGH);       // turn on pullup resistors
-  digitalWrite(A5, HIGH);       // turn on pullup resistors
-  attachInterrupt(A4, interrupt_A4, FALLING); // attach interrupt
-  attachInterrupt(A5, interrupt_A5, FALLING);
-  #endif*/
   #ifdef A0_MULTIPLICATOR
   reg_port(0x01, TYPE_Volt);
   #endif
@@ -245,18 +227,28 @@ void get_fuel() {
         float fuel_diff = pgm_read_word_near(&vw_fuel[i-1][1]) - pgm_read_word_near(&vw_fuel[i][1]);
 
         // calculate the real value to the real resistor value
-        fuel_l = int( pgm_read_word_near(&vw_fuel[i][1]) + (fuel_diff / ohm_diff ) * temp_ohm );
+        temp = int( pgm_read_word_near(&vw_fuel[i][1]) + (fuel_diff / ohm_diff ) * temp_ohm );
 
         i=sizeof(vw_fuel)/sizeof(vw_fuel[0]);
       }
     }
   }
 
+  fuel_array[IO_ARRAY-1] = temp;
+  for (int i = 0; i < IO_ARRAY-1; i++) {
+
+    fuel_array[i] = a1_tmp[i+1];
+    temp += fuel_array[i];
+  }
+
+  temp += fuel_array[IO_ARRAY-1];
+  fuel_l = temp / IO_ARRAY;
+
 
   //message(DEBUG_IO, String(fuel_ohm));
-  float fuel_pct =(fuel_ohm - FUEL_FULL) * 100 / (FUEL_EMPTY - FUEL_FULL);
-  fuel_pct = 100 - fuel_pct;
-  fuel_l = fuel_pct * FUEL_L / 100;
+  //float fuel_pct =(fuel_ohm - FUEL_FULL) * 100 / (FUEL_EMPTY - FUEL_FULL);
+  //fuel_pct = 100 - fuel_pct;
+  //fuel_l = fuel_pct * FUEL_L / 100;
   //fuel_l = fuel_pct;
 
 

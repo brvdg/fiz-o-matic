@@ -1,11 +1,11 @@
+/****************************************************
+ * fiz-o-matic
+ * https://fiz-o-matic.net/
+ *
+ * Author: Brun
+ * License: Creative Common (CC BY-NC-SA 4.0)
+ ****************************************************/
 
-WidgetTerminal terminal(BLYNK_VIRTUAL_terminal);
-WidgetMap myMap(BLYNK_VIRTUAL_map);
-WidgetLED geo_fence_armed_led(BLYNK_VIRTUAL_geo_fence_armed_led);
-WidgetLED geo_fence_led(BLYNK_VIRTUAL_geo_fence_led);
-WidgetLED online_LED(BLYNK_VIRTUAL_online_LED);
-WidgetLED armed_led(BLYNK_VIRTUAL_armed_led);
-WidgetLED alarm_led(BLYNK_VIRTUAL_alarm_led);
 
 
 /*

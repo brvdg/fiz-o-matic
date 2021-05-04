@@ -53,6 +53,9 @@ void message(byte loglevel, String msg) {
     else if ( loglevel == BOOTMSG ) {
       Serial.print(F("[BOOT]: "));
     }
+    else if ( loglevel == I2C_MSG ) {
+      Serial.print(F("[I2C]: "));
+    }
     else {
       Serial.print(F("[ELSE]: "));
       //Serial.println(msg);

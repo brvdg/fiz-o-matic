@@ -19,9 +19,6 @@
 // how long ist the display active in the standby after an action
 #define DISPLAY_ACTIVE_TIME 30000
 
-//#define CLOCK_VIEW 1 // 1 = clock and temperature / 0 = clock and date
-
-//#define DISPLAY_TEMP false // display temperature insted of date in standby
 
 // enable SD card
 //#define SDCard
@@ -46,28 +43,7 @@
 // we are online if the car is turned off
 #define ONLINE_INTERVALL 15 // interval in min
 
-#define BLYNK_VIRTUAL_terminal V0
-#define BLYNK_VIRTUAL_map V1
-#define BLYNK_VIRTUAL_gps_used_satellites V2
-#define BLYNK_VIRTUAL_gps_view_satellites V3
-#define BLYNK_VIRTUAL_gps_latitude V4
-#define BLYNK_VIRTUAL_gps_longitude V5
-#define BLYNK_VIRTUAL_gps_altitude V6
-#define BLYNK_VIRTUAL_bord_voltage V7
-#define BLYNK_VIRTUAL_stay_online V8
-#define BLYNK_VIRTUAL_online_LED V9
-#define BLYNK_VIRTUAL_geoalarm_modus V10
-#define BLYNK_VIRTUAL_geo_fence_armed_led V11
-#define BLYNK_VIRTUAL_geo_fence_distance V12
-#define BLYNK_VIRTUAL_geo_fence_led V13
-#define BLYNK_VIRTUAL_alarm V14
-#define BLYNK_VIRTUAL_armed_led V15
-#define BLYNK_VIRTUAL_alarm_led V16
-#define BLYNK_VIRTUAL_aux_heater V17
-#define BLYNK_VIRTUAL_temp_out V18
-#define BLYNK_VIRTUAL_hum_out V19
-#define BLYNK_VIRTUAL_temp_in V20
-#define BLYNK_VIRTUAL_hum_in V21
+
 
 #define USE_GPS_SPEED true // use GPS for speed Signal
 
@@ -203,6 +179,7 @@
 #define LOG_TIMER 1000 // 1s
 #define STATUS_CHECKER_TIMER 200 // 200ms
 #define TAIL_TIMER 2000 // 2sec
+#define FUEL_TIMER 5000 // 5sec
 
 #define TinyGSM_TIMER 2000 // 1s
 
@@ -222,62 +199,3 @@
 
 // Number of values for an average
 #define IO_ARRAY 100
-
-
-
-
-// enable Debugging
-//#define OFFLINE // disable some functions for programming and testing
-/*#define INFO
-#define DEBUG
-#define TINYGSM_DEBUG
-#define SD_DEBUG
-#define TRACE*/
-
-//#ifdef TINYGSM_DEBUG
-//#define BLYNK_PRINT Serial // Defines the object that is used for printing
-//#define BLYNK_DEBUG        // Optional, this enables more detailed prints
-//#endif
-
-// print the status on serial port
-//#define PRINT_STATUS
-
-/*#ifdef INFO
- #define INFO_PRINT(x)  Serial.print (x)
- #define INFO_PRINTLN(x)  Serial.println (x)
- #define INFO_PRINTHEX(x)  Serial.print (x, HEX)
-#else
- #define INFO_PRINT(x)
- #define INFO_PRINTLN(x)
- #define INFO_PRINTHEX(x)
-#endif*/
-/*#ifdef DEBUG
- #define DEBUG_PRINT(x)  Serial.print (x)
- #define DEBUG_PRINTLN(x)  Serial.println (x)
-#else
- #define DEBUG_PRINT(x)
- #define DEBUG_PRINTLN(x)
-#endif*/
-/*#ifdef TINYGSM_DEBUG
- #define TINYGSM_DEBUG_PRINT(x)  Serial.print (x)
- #define TINYGSM_DEBUG_PRINTLN(x)  Serial.println (x)
-#else
- #define TINYGSM_DEBUG_PRINT(x)
- #define TINYGSM_DEBUG_PRINTLN(x)
-#endif*/
-/*#ifdef SD_DEBUG
- #define SD_DEBUG_PRINT(x)  Serial.print (x)
- #define SD_DEBUG_PRINTLN(x)  Serial.println (x)
-#else
- #define SD_DEBUG_PRINT(x)
- #define SD_DEBUG_PRINTLN(x)
-#endif*/
-
-
-/*#ifdef TRACE
- #define TRACE_PRINT(x)  Serial.print (x)
- #define TRACE_PRINTLN(x)  Serial.println (x)
-#else
- #define TRACE_PRINT(x)
- #define TRACE_PRINTLN(x)
-#endif*/

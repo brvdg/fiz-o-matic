@@ -14,34 +14,31 @@
 bool fuel_notified = false;
 
 void status_checker() {
-  //if ( status_checker_timer < millis() ) {
+  check_engine();
 
-    check_engine();
+  /*
+   * functions based on tinygsm
+   */
+  if ( tinygsminit ) {
+    check_alarm_system();
+    check_geo_fence();
+    check_online();
+  }
+  else{
+    message(TRACE_MSG, F("#tinygsminit=false\n"));
+  }
 
-    /*
-     * functions based on tinygsm
-     */
-    if ( tinygsminit ) {
-      check_alarm_system();
-      check_geo_fence();
-      check_online();
-    }
-    else{
-      message(TRACE_MSG, F("#tinygsminit=false\n"));
-    }
+  if ( engine_running ) {
+    engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
+  }
 
-    if ( engine_running ) {
-      engine_running_sec = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear()) - engine_start;
-    }
+  check_water_temp();
+  check_fuel();
 
-    check_water_temp();
-    check_fuel();
+  check_auxiliary_heating();
 
-    check_auxiliary_heating();
-
-    status_checker_timer = millis() + STATUS_CHECKER_TIMER;
-    delay(STATUS_CHECKER_TIMER);
-  //}
+  status_checker_timer = millis() + STATUS_CHECKER_TIMER;
+  delay(STATUS_CHECKER_TIMER);
 }
 
 
