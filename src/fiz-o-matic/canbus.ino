@@ -73,19 +73,19 @@ void can_send () {
   CAN.endPacket();
   #endif
 
-  #ifdef CANMASTER_gps
+  #ifdef CAN_gps_MASTER
   CAN.beginPacket(CANADDR_gps_lat_long);
   gps_latitude_long = long(gps_latitude*100000);
-  can_buff[CANBYTE_gps_latitude] = gps_latitude_long >> 24;
-  can_buff[CANBYTE_gps_latitude+1] = gps_latitude_long >> 16;
-  can_buff[CANBYTE_gps_latitude+2] = gps_latitude_long >> 8;
-  can_buff[CANBYTE_gps_latitude+3] = gps_latitude_long;
+  can_buff[0] = gps_latitude_long >> 24;
+  can_buff[1] = gps_latitude_long >> 16;
+  can_buff[2] = gps_latitude_long >> 8;
+  can_buff[3] = gps_latitude_long;
 
   gps_longitude_long = long(gps_longitude*100000);
-  can_buff[CANBYTE_gps_longitude] = gps_longitude_long >> 24;
-  can_buff[CANBYTE_gps_longitude+1] = gps_longitude_long >> 16;
-  can_buff[CANBYTE_gps_longitude+2] = gps_longitude_long >> 8;
-  can_buff[CANBYTE_gps_longitude+3] = gps_longitude_long;
+  can_buff[4] = gps_longitude_long >> 24;
+  can_buff[5] = gps_longitude_long >> 16;
+  can_buff[6] = gps_longitude_long >> 8;
+  can_buff[7] = gps_longitude_long;
 
   CAN.write(can_buff, 8);
   CAN.endPacket();

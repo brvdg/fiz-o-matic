@@ -8,7 +8,7 @@
 
 
 #define VERSION "0.8"
-#define BUILD "210506a"
+#define BUILD "210706a"
 
 
 #include <stdarg.h>
@@ -162,7 +162,7 @@ void setup() {
   /*
    * initialize the IO Ports
    */
-
+  /* for testing
   reg_port(0xF1, TYPE_Volt);
   reg_port(0xF2, TYPE_Volt);
   reg_port(0xF3, TYPE_GradCelsius);
@@ -175,6 +175,7 @@ void setup() {
   update_port_value( 0xF4, 80 );
   update_port_value( 0xF5, 23.4 );
   update_port_value( 0xF6, 64 );
+  */
 
   //IO_init();
   can_init();
@@ -221,17 +222,6 @@ void setup() {
   // set time for Software Watchdog
   watchdog_timer = millis() + WATCHDOG_TIMER*10;
 
-
-
-  //
-  /********************* Timer #3, 8 bit, one callback with adjustable period = 350KHz ~ 2.86us for DAC updates */
-  /*zt3.configure(TC_CLOCK_PRESCALER_DIV1, // prescaler
-                TC_COUNTER_SIZE_8BIT,   // bit width of timer/counter
-                TC_WAVE_GENERATION_MATCH_PWM  // match style
-                );
-  zt3.setPeriodMatch(150, 1, 0); // ~350khz, 1 match, channel 0
-  zt3.setCallback(true, TC_CALLBACK_CC_CHANNEL0, Timer3Callback0);  // set callback
-  zt3.enable(true);*/
 
 
   /********************* Timer #4, 8 bit, one callback with adjustable period */
@@ -452,38 +442,6 @@ bool millisRollover() {
   }
 }
 
-
-
-/*
- *   Internal Timer
- */
- /*
-void TC3_Handler()
-{
-
-  TcCount16* TC = (TcCount16*) TC3; // get timer struct
-  if (TC->INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
-    TC->INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
-
-    if ( alarm_timer < millis() ) {
-      alarm_timer = millis() + ALARM_TIMER;
-      alarm_loop();
-
-    }
-
-    // Wagchdog
-    if ( watchdog_timer < millis() ) {
-        // reset the system
-        Serial.println(F("#Watchdog reset"));
-        flash_watchdog_reset.write(true);
-        NVIC_SystemReset();
-    }
-
-    // Button ...
-    //button();
-  }
-
-}*/
 
 
 void Timer4Callback0()
