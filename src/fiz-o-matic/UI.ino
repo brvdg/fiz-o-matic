@@ -71,7 +71,7 @@ String parse_ui_string(String msg, uint8_t src) {
       output_msg = F("OK");
     }
   }
-  else if ( msg.startsWith(F("tinygsm_info")) ) {
+  else if ( msg.startsWith(F("tinygsm_info")) || msg.startsWith(F("info")) ) {
     if ( src == SRC_SMS ) {
       output_msg = "command not found\n";
     }

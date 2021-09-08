@@ -303,6 +303,9 @@ void menu_trip() {
       //gps_distance_trip = 0;
       gps_speed_max_trip = 0;
       engine_running_total = 0;
+      engine_running_sec = 0;
+      engine_start = unixTime(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear());
+      clear_screen();
       trip_distance = 0;
       gps_distance = 0;
       break;

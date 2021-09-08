@@ -14,7 +14,7 @@ void can_init() {
   if (CAN.begin(50E3)) {
     //DEBUG_PRINTLN(F("Starting CAN finished"));
     message(DEBUG_MSG, F("Starting CAN finished"));
-    CAN.onReceive(onReceive);
+    CAN.onReceive(can_receive);
     can_active = true;
   }
   else {
@@ -37,7 +37,7 @@ void can_loop () {
 
 }
 
-void can_send () {
+/*void can_send () {
   // try to parse packet
   packetSize = CAN.parsePacket();
 
@@ -65,10 +65,7 @@ void can_send () {
   timebuffer[1] = time_tmp >> 16;
   timebuffer[2] = time_tmp >> 8;
   timebuffer[3] = time_tmp;
-  /*CAN.write(time_tmp >> 24);
-  CAN.write(time_tmp >> 16);
-  CAN.write(time_tmp >> 8);
-  CAN.write(time_tmp);*/
+
   CAN.write(timebuffer, 4);
   CAN.endPacket();
   #endif
@@ -109,12 +106,63 @@ void can_send () {
   //message(DEBUG_MSG,String(timebuffer[3], DEC));
   message(DEBUG_MSG,String(time_tmp, DEC));
 
+  #ifdef CAN_voltage_Master
+  CAN.beginPacket(CANADDR_voltage);
+  can_buff[0] = bord_voltage*10;
+  can_buff[1] = batt1_voltage*10;
+  can_buff[2] = batt2_voltage*10;
 
+  CAN.write(can_buff, 3);
+  CAN.endPacket();
+  #endif
+
+  #ifdef CAN_fuel_water_MASTER
+  CAN.beginPacket(CANADDR_fuel_water);
+  can_buff[0] = fuel_l;
+  can_buff[1] = water_temp;
+
+  CAN.write(can_buff, 2);
+  CAN.endPacket();
+  #endif
+
+  #ifdef CAN_oil_MASTER
+  CAN.beginPacket(CANADDR_oil);
+  can_buff[0] = oil_temp;
+  can_buff[1] = oil_pressure;
+
+  CAN.write(can_buff, 2);
+  CAN.endPacket();
+  #endif
+
+  #ifdef CAN_trip_MASTER
+  CAN.beginPacket(CANADDR_trip);
+  can_buff[0] = trip_a >> 8;
+  can_buff[1] = trip_a;
+
+  can_buff[2] = trip_day >> 8;
+  can_buff[3] = trip_day;
+
+  CAN.write(can_buff, 4);
+  CAN.endPacket();
+  #endif
+
+  #ifdef CAN_klima_MASTER
+  CAN.beginPacket(CANADDR_trip);
+  can_buff[0] = int(temp_out) >> 8;
+  can_buff[1] = int(temp_out);
+  can_buff[2] = int(temp_in) >> 8;
+  can_buff[3] = int(temp_in);
+  can_buff[4] = hum_out;
+  can_buff[5] = hum_in;
+
+  CAN.write(can_buff, 6);
+  CAN.endPacket();
+  #endif
 }
 
 void onReceive(int packetSize) {
 
-}
+}*/
 
 #else
 

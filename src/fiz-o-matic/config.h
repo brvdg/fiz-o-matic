@@ -27,7 +27,7 @@
 //TinyGSM configuration
 //#define TinyGSM
 #define SIM_PIN ""
-#define APN "internet.t-mobile"
+#define APN ""
 #define APN_USER "t-mobile"
 #define APN_PASS "tm"
 #define SMS_KEYWORD "fiz"
@@ -158,7 +158,8 @@
  #define CAN_rpm_Master
  #define CAN_fuel_water_MASTER
  #define CAN_oil_MASTER
- #define CAN_klima_Master
+ #define CAN_klima_MASTER
+ #define CAN_trip_MASTER
 
 
 

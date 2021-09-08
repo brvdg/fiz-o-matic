@@ -1,4 +1,13 @@
 /*
+ *
+ * 210829a
+ - fix for trip reset
+ - update TinyGSM Library to 0.11.4
+ - update "info" command to print TinyGSM Infos
+
+ * 210706a
+ * - fix smoother fuel calculation
+ *
  * 210506a
  * - a little bit cleanup
  * - smoother fule calculation

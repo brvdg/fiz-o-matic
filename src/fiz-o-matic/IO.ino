@@ -43,7 +43,8 @@ int vw_fuel [][2] PROGMEM = {  {211, 2},
                         {46, 41},
                         {39, 46},
                         {32, 51},
-                        {30, 57}};
+                        {30, 57},
+                        {10, 58}};
 
 void IO_init() {
 
@@ -199,7 +200,7 @@ void vw_water_temp() {
 
 void get_fuel() {
   float val=0;
-  float temp = 0;
+  float tmp = 0;
 
   int array_size = sizeof(vw_fuel)/sizeof(vw_fuel[0]);
 
@@ -209,17 +210,20 @@ void get_fuel() {
 
   float ohm = FUEL_GAUGERESISTOR * (fuel_V  / (10 - fuel_V ));
   fuel_ohm = ohm;
+  //message(DEBUG_IO, String(fuel_ohm));
 
   if ( ohm > vw_fuel[0][0] ) {
-    fuel_l = 0;
+    tmp = 0;
   }
   else if ( ohm < vw_fuel[array_size-1][0] ) {
-    fuel_l = 255;
+    //Serial.println(vw_fuel[array_size-1][0]);
+    tmp = 255;
   }
   else {
     for (int i=0; i<array_size;i++) {
       // find the 1st value in the array which is higher then the real value
       if (ohm > vw_fuel[i][0] ) {
+        //Serial.print(vw_fuel[i][0], DEC); Serial.print(", ");
         // get the difference from the array value and the real value
         float temp_ohm = pgm_read_word_near(&vw_fuel[i-1][0]) - ohm;
         // get the difference between two values in the array
@@ -227,23 +231,29 @@ void get_fuel() {
         float fuel_diff = pgm_read_word_near(&vw_fuel[i-1][1]) - pgm_read_word_near(&vw_fuel[i][1]);
 
         // calculate the real value to the real resistor value
-        temp = int( pgm_read_word_near(&vw_fuel[i][1]) + (fuel_diff / ohm_diff ) * temp_ohm );
+        tmp = int( pgm_read_word_near(&vw_fuel[i][1]) + (fuel_diff / ohm_diff ) * temp_ohm );
 
         i=sizeof(vw_fuel)/sizeof(vw_fuel[0]);
       }
     }
   }
 
-  fuel_array[IO_ARRAY-1] = temp;
+  //message(DEBUG_IO, String(tmp));
+
+  fuel_array[IO_ARRAY-1] = tmp;
   for (int i = 0; i < IO_ARRAY-1; i++) {
 
-    fuel_array[i] = a1_tmp[i+1];
-    temp += fuel_array[i];
+    fuel_array[i] = fuel_array[i+1];
+    tmp += fuel_array[i];
+    //message(DEBUG_IO, String(tmp));
   }
 
-  temp += fuel_array[IO_ARRAY-1];
-  fuel_l = temp / IO_ARRAY;
+  //message(DEBUG_IO, String(temp));
 
+  //temp += fuel_array[IO_ARRAY-1];
+  fuel_l = tmp / IO_ARRAY;
+
+  //message(DEBUG_IO, String(fuel_l));
 
   //message(DEBUG_IO, String(fuel_ohm));
   //float fuel_pct =(fuel_ohm - FUEL_FULL) * 100 / (FUEL_EMPTY - FUEL_FULL);

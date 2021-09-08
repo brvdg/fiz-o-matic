@@ -49,7 +49,7 @@ boolean debug = false;
 #define SERIAL_MSG 6
 #define STORAGE 8
 #define ALARM 10
-#define DEBUG_IO 16
+#define DEBUG_IO 18
 #define GPS 32
 #define TINYGSM_MSG 64
 #define BLYNK_MSG 68
@@ -58,6 +58,7 @@ boolean debug = false;
 #define TRACE_MSG 128
 #define U8G2_MSG 132
 #define I2C_MSG 134
+#define CAN_MSG 136
 
 
 /*

@@ -56,6 +56,12 @@ void message(byte loglevel, String msg) {
     else if ( loglevel == I2C_MSG ) {
       Serial.print(F("[I2C]: "));
     }
+    else if ( loglevel == DEBUG_IO ) {
+      Serial.print(F("[IO]: "));
+    }
+    else if ( loglevel == CAN_MSG ) {
+      Serial.print(F("[CAN]: "));
+    }
     else {
       Serial.print(F("[ELSE]: "));
       //Serial.println(msg);

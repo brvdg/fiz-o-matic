@@ -30,6 +30,10 @@
 
 //#define TINY_GSM_YIELD() { delay(10); yield(); }
 
+// See all AT commands, if wanted
+//#define DUMP_AT_COMMANDS
+
+
 // Select your modem:
 //#define TINY_GSM_MODEM_SIM800
 #define TINY_GSM_MODEM_SIM808
@@ -170,16 +174,41 @@ void tinygsm_init()
 String tinygsm_info() {
 
   String msg;
+  float timezome;
+  float accuracy = 0;
 
   msg = "=== TinyGSM Info ===\n";
 
   msg += "CCID: " + modem.getSimCCID() + "\n";
   msg += "IMEI: " + modem.getIMEI() + "\n";
+  msg += "SIM Status: " + String(modem.getSimStatus(), DEC) + "\n";
   msg += "Operator: " + modem.getOperator() + "\n";
+  msg += "GPRS: ";
+  if (modem.isGprsConnected()) {
+    msg += "connected \n";
+  } else {
+    msg += "not connected \n";
+  }
+  msg += "Network: ";
+  if (modem.isNetworkConnected()) {
+    msg += "connected \n";
+  } else {
+    msg += "not connected \n";
+  }
   IPAddress local = modem.localIP();
   msg += "Local IP: " + String(local[0]) + "." + String(local[1]) + "." + String(local[2]) + "." + String(local[3]) + "\n";
-  msg += "Signal quality: " + String(modem.getSignalQuality(), 0) + "\n";
+  msg += "Signal quality: " + String(modem.getSignalQuality(), DEC) + "\n";
   msg += "GSM location: " + modem.getGsmLocation() + "\n";
+  //modem.getGSMDateTime(&gps_year, &gps_month, &gps_day, &gps_hour, &gps_minute, &gps_second, &timezome);
+  //msg += "GSM Time:" + String(gps_year) + "-" + String(gps_month) + "-" + String(gps_day) + " / " + String(gps_hour) + ":" + String(gps_second) + ":" + String(gps_second);
+  //String time = modem.getGSMDateTime(DATE_FULL);
+  //msg += "GSM Time:" + time;
+  if (modem.getGsmLocation(&gps_latitude, &gps_longitude, &accuracy, &gps_year, &gps_month, &gps_day, &gps_hour,
+                             &gps_minute, &gps_second)) {
+    msg += "GSM Time:" + String(gps_year) + "/" + String(gps_month) + "/" + String(gps_day) + " - " + String(gps_hour) + ":" + String(gps_second) + ":" + String(gps_second);
+
+
+  }
 
   return msg;
 

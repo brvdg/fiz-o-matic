@@ -92,8 +92,8 @@ boolean oil_pressure_active = false;
 
 // Temperature / Humidity
 //#define CAN_klima_SLAVE
-#if defined CAN_klima_SLAVE || defined CAN_klima_Master
-#define CANADDR_klima 0xB6
+#if defined CAN_klima_SLAVE || defined CAN_klima_MASTER
+//#define CANADDR_klima 0xB6
 //int temp_out = 0;
 boolean temp_out_active = false;
 //int temp_in = 0;
@@ -103,5 +103,14 @@ boolean hum_out_active = false;
 //byte hum_in = 0;
 boolean hum_in_active = false;
 #endif
+
+#if defined CAN_trip_SLAVE || defined CAN_trip_MASTER
+unsigned int trip1 = 112;
+boolean trip1_active = false;
+
+unsigned int trip2 = 26;
+//boolean trip_day_active = false;
+#endif
+
 
 #endif //CANBUS
